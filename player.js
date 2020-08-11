@@ -1,6 +1,7 @@
 var Player = {
     gold: 0,
     xp: 0,
+    xpReq: 5,
     level: 1,
     inventory: {},
     
