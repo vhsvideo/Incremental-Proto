@@ -1,0 +1,71 @@
+body {
+    height: 100%;
+    margin: 0;
+}
+
+#content{
+    float: left;
+}
+
+.infoPanel {
+    border: 2px solid black;
+    float: left;
+    width: 300px;
+    height: 700px
+}
+
+.main {
+    height: 500px;
+    width: 700px;
+    float: right;
+    border: 1px solid black;
+}
+
+.options span:hover{
+    text-decoration: underline;
+}
+
+.messageBox {
+    position: absolute;
+    top: 99%;
+    left: 50%;
+    margin-top: -12%;
+    margin-left: -350px;
+    width: 700px;
+    height: 150px;
+    opacity: 100%;
+    border: 2px solid black;
+    background: #FFFFFF;
+}
+
+.options {
+    position: absolute;
+    bottom:0%;
+    left:50%;
+    height:30px;
+    width:100px;
+    opacity: 100%;
+    margin-left: -50px;
+    background:#999;
+    text-align: center;
+    line-height: 30px;
+    border: 2px solid black;
+}
+
+.showMsgBox {
+    cursor: pointer;
+}
+
+/* PROGERSS BAR STYLES */
+
+#mainBar {
+    width: 100%;
+    background-color: lightgrey;
+    border: 1px solid black;
+}
+
+#progressBarMain {
+    width: 1%;
+    height: 30px;
+    background-color: blue;
+}
