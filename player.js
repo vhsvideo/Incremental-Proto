@@ -3,10 +3,11 @@ var Player = {
     xp: 0,
     xpReq: 5,
     level: 1,
+    energy: 100,
     inventory: {
         tooth: 0,
         pelt: 0,
-        "coin_pouch": 0
+        "coin pouch": 0
     },
     
     stats: {

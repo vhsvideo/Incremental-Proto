@@ -1,6 +1,6 @@
 var Loot = {
 
-    trash: { list: [
+    list: { trash: [
         {
             name: 'tooth',
             value: 5,
@@ -14,7 +14,7 @@ var Loot = {
         },
 
         {
-            name: 'coin_pouch',
+            name: 'coin pouch',
             value: 100,
             weight: 0.3
         }

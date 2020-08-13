@@ -1,4 +1,7 @@
 var msgBoxShow = true;
+var lootList = [];
+var defaultSpeed = 1000;
+var mainTimer;
 
 function gainXp(){
     if (Player.xp + 2 >= Player.xpReq) {
@@ -12,31 +15,21 @@ function gainXp(){
 }
 
 function getLoot(){
-    var lootList = [];
-    for (var l in Loot.trash.list) {   //l is a number
-        var loot = {};
-        loot.name = Loot.trash.list[l].name;
-        loot.value = Loot.trash.list[l].value;
-        loot.weight = Loot.trash.list[l].weight;
-        lootList.push(loot);
-    };
-    console.log(lootList.length);
-    
-
     var i;
     
     for(i = 0; i < (lootList.length); i++) {
         var roll = Math.random();
         if (roll <= lootList[i].weight) {
-            if ($("." + lootList[i].name)[0]) {  //if it's already listed in inventory
-                lootList[i].name;
+            var item = lootList[i].name;
+            item = item.replace(/\s+/g, '');    //remove spaces for class
+            if ($("." + item)[0]) {                     //if it's already listed in inventory, add to it
                 Player.inventory[lootList[i].name] += 1;
-                $("." + lootList[i].name)
+                $("." + item)
                 .text(Player.inventory[lootList[i].name] +" "+ lootList[i].name)
             } else {
                 Player.inventory[lootList[i].name] += 1;
                 $('<div>')
-                .addClass(lootList[i].name)
+                .addClass(item)
                 .text(Player.inventory[lootList[i].name] +" "+ lootList[i].name)
                 .appendTo(".inventory");
             }
@@ -44,13 +37,7 @@ function getLoot(){
     }
 }
 
-function onKill(){
-    Player.gold += 1;
-    gainXp();
-    getLoot();
-    $('.gold').text("Gold: " + Player.gold);
-    $('.xp').text("Experience: " + Player.xp);
-}
+
 
 function msgBoxToggle(){
     if (msgBoxShow){
@@ -80,18 +67,73 @@ function init(){
     $('<div>').addClass('gold').html('<b>Gold: 0</b>').appendTo('.infoPanel');
     $('<div>').addClass('xp').text('Experience: 0').appendTo('.infoPanel');
     $('<div>').addClass('level').text('Level: 1').appendTo('.infoPanel');
+    $('<div>').addClass('energy').text('Energy: 100%').appendTo('.infoPanel');
+
+    //Buttons
+
 }
 
 function initTimers(){
     $('<div>').attr("id","mainBar").appendTo(".centerPanel");
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
 
-    var mainTimer = Timer.setTimer("#progressBarMain", 1000); //Main timer in middle
+    //var mainTimer2 = Timer.setTimer("#progressBarMain", defaultSpeed);
+
+    mainTimer = window.setInterval(function(){
+        $("#progressBarMain").animate({width: '100%'}, defaultSpeed, 'linear', function(){
+            $("#progressBarMain").css("width", "0%");
+        });
+        onKill();
+    }, defaultSpeed);
+
+    //console.log("MT1: " + mainTimer);
+    //console.log("MT2: " + mainTimer2);
+    //mainTimer = Timer.setTimer("#progressBarMain", defaultSpeed); //Main timer in middle
 }
 
+function initLootTables(){
+    for (var l in Loot.list.trash) {   //l is a number
+        var loot = {};
+        loot.name = Loot.list.trash[l].name;
+        loot.value = Loot.list.trash[l].value;
+        loot.weight = Loot.list.trash[l].weight;
+        lootList.push(loot);
+    };
+}
 
+function onKill(){
+    Player.gold += 1;
+    gainXp();
+    getLoot();
+
+    
+    
+    $('.gold').text("Gold: " + Player.gold);
+    $('.xp').text("Experience: " + Player.xp);
+    $('.energy').text("Energy: " + Player.energy + "%");
+/*
+    if(Player.energy == 0) {
+        console.log("Energy: " + Player.energy);
+        clearInterval(mainTimer);
+    }*/
+
+    if((Player.energy - 5) > 0){
+        clearInterval(mainTimer);
+        Player.energy -= 5;
+        let speedMult = (defaultSpeed + (50 * (100 - Player.energy)));
+        mainTimer = window.setInterval(function(){
+            $("#progressBarMain").animate({width: '100%'}, speedMult, 'linear', function(){
+                $("#progressBarMain").css("width", "0%");
+            });
+            onKill();
+        }, speedMult);
+        $('.energy').text("Energy: " + Player.energy + "%");
+
+        console.log(speedMult);
+        
+    }
+}
 
 init();
+initLootTables();
 initTimers();
-
-getLoot();
