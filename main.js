@@ -1,7 +1,7 @@
 var msgBoxShow = true;
 var lootList = [];
 var defaultSpeed = 1000;
-var mainTimer;
+var mainTimer = undefined;
 
 function gainXp(){
     if (Player.xp + 2 >= Player.xpReq) {
@@ -37,7 +37,17 @@ function getLoot(){
     }
 }
 
-
+function switchScene(scene) {
+    if (scene == ".mainScene") {
+        initTimers();
+    } else {
+        clearInterval(mainTimer);
+    }
+    
+    $('.restScene').css("display","none");
+    $('.mainScene').css("display","none");
+    $(scene).css("display","inline-block");
+}
 
 function msgBoxToggle(){
     if (msgBoxShow){
@@ -59,23 +69,47 @@ function init(){
         .text('Show/Hide')
         .click(msgBoxToggle)
         .appendTo(".options");
+
+    //3 Center panels
     $('<div>').addClass('infoPanel').text('Info').appendTo("#content");
-    $('<div>').addClass('centerPanel').text('Progress').appendTo("#content");
+    $('<div>').addClass('centerPanel').appendTo("#content");
     $('<div>').addClass('inventory').text('Inventory').appendTo("#content");
 
+    //Render different things to appear in center panel.
+    $('<div>').addClass('mainScene').appendTo('.centerPanel');
+    $('<div>').addClass('restScene').appendTo('.centerPanel');
+    $('<div>').attr("id","mainBar").appendTo(".mainScene");
+    $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
+
     //Player Info
-    $('<div>').addClass('gold').html('<b>Gold: 0</b>').appendTo('.infoPanel');
+    $('<div>').addClass('gold').html('Gold: 0').appendTo('.infoPanel');
     $('<div>').addClass('xp').text('Experience: 0').appendTo('.infoPanel');
     $('<div>').addClass('level').text('Level: 1').appendTo('.infoPanel');
     $('<div>').addClass('energy').text('Energy: 100%').appendTo('.infoPanel');
+    $('<div>').addClass('str').text('Str: 10').appendTo('.infoPanel');
+    $('<div>').addClass('dex').text('Dex: 10').appendTo('.infoPanel');
+    $('<div>').addClass('int').text('Int: 10').appendTo('.infoPanel');
+    $('<div>').addClass('con').text('Con: 10').appendTo('.infoPanel');
+    $('<div>').addClass('wis').text('Wis: 10').appendTo('.infoPanel');
+    $('<div>').addClass('luk').text('Luk: 10').appendTo('.infoPanel');
 
     //Buttons
+    $('<div>')
+    .addClass('btn')
+    .attr("id","btn-kill")
+    .text('Kill')
+    .click(function(){switchScene(".mainScene");})
+    .appendTo('.restScene');
 
+    $('<div>')
+    .addClass('btn')
+    .attr("id","btn-rest")
+    .text('Rest')
+    .click(function(){switchScene(".restScene");})
+    .appendTo('.mainScene')
 }
 
 function initTimers(){
-    $('<div>').attr("id","mainBar").appendTo(".centerPanel");
-    $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
 
     //var mainTimer2 = Timer.setTimer("#progressBarMain", defaultSpeed);
 
@@ -105,19 +139,14 @@ function onKill(){
     Player.gold += 1;
     gainXp();
     getLoot();
-
     
     
     $('.gold').text("Gold: " + Player.gold);
     $('.xp').text("Experience: " + Player.xp);
     $('.energy').text("Energy: " + Player.energy + "%");
-/*
-    if(Player.energy == 0) {
-        console.log("Energy: " + Player.energy);
-        clearInterval(mainTimer);
-    }*/
 
-    if((Player.energy - 5) > 0){
+    //Timer object function returns undefined - need to fix?  Maybe?
+    if((Player.energy) > 0){
         clearInterval(mainTimer);
         Player.energy -= 5;
         let speedMult = (defaultSpeed + (50 * (100 - Player.energy)));
@@ -128,12 +157,9 @@ function onKill(){
             onKill();
         }, speedMult);
         $('.energy').text("Energy: " + Player.energy + "%");
-
-        console.log(speedMult);
-        
     }
 }
 
 init();
 initLootTables();
-initTimers();
+//initTimers();

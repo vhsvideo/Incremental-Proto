@@ -28,6 +28,10 @@ var Player = {
         boots: "",
         wpn1: "",
         wpn2: ""
+    },
+
+    rest: function(){
+        return 0;
     }
 
 
