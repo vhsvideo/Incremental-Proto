@@ -1,75 +1,47 @@
+/* PAGE STYLES */
+
 #content {
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
     border: 1px solid black;
 }
 
-.menuTop {
-    height: 50px;
+.gameContent {
     border: 1px solid black;
+    margin: 0 auto;
+    width: 90%;
+    height: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    min-width: 1200px;
 }
 
 .inventory {
-    padding: 4px 4px 4px 4px;
-    position: absolute;
     border: 1px solid black;
     width: 250px;
-    height: 700px;
-    margin-left: 964px;
+    height: 100%;
 }
 
 .infoPanel {
-    padding: 4px 4px 4px 4px;
-    position: absolute;
     border: 1px solid black;
     width: 250px;
-    height: 700px;
-    margin-right: 964px;
+    height: 100%;
 }
 
 .centerPanel {
-    padding: 2px 2px 2px 2px;
-    position: absolute;
-    height: 500px;
+    position: relative;
     width: 700px;
+    height: 100%;
     border: 1px solid black;
 }
 
-.options span:hover{
-    text-decoration: underline;
-}
-
 .messageBox {
+    width: 100%;
+    height: 140px;
     position: absolute;
-    top: 99%;
-    left: 50%;
-    margin-top: -12%;
-    margin-left: -350px;
-    width: 700px;
-    height: 150px;
-    opacity: 100%;
-    border: 2px solid black;
-    background: #FFFFFF;
-}
-
-.options {
-    position: absolute;
-    bottom:0%;
-    left:50%;
-    height:30px;
-    width:100px;
-    opacity: 100%;
-    margin-left: -50px;
-    background:#999;
-    text-align: center;
-    line-height: 30px;
-    border: 2px solid black;
-}
-
-.showMsgBox {
-    cursor: pointer;
+    bottom: 0;
+    border: 1px solid black;
 }
 
 /* SCENE STYLES */
@@ -94,7 +66,7 @@
 }
 
 #progressBarMain {
-    width: 1%;
+    width: 0%;
     height: 30px;
     background-color: blue;
 }

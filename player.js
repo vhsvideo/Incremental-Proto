@@ -3,6 +3,8 @@ var Player = {
     xp: 0,
     xpReq: 5,
     level: 1,
+    lvlBefore: 1,
+    lvlAfter: 1,
     energy: 100,
     inventory: {
         tooth: 0,
@@ -31,8 +33,15 @@ var Player = {
     },
 
     rest: function(){
-        return 0;
+        Player.energy = 100;
+        $('.energy').text('Energy: ' + Player.energy + '%');
+        let diff = this.lvlAfter - this.lvlBefore;
+        console.log(diff)
+        if (diff > 0) {
+            this.stats.str += diff * 3;
+            $('.str').text("Str: " + this.stats.str);
+        } else {
+            console.log("No difference.")
+        }
     }
-
-
 };

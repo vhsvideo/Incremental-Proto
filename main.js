@@ -1,7 +1,12 @@
+_DEFAULT_SPEED = 1000;
+
 var msgBoxShow = true;
 var lootList = [];
-var defaultSpeed = 1000;
+var intervalSpeed = 1000;
 var mainTimer = undefined;
+
+var mainBarProg = 0;
+var taskCompleteFlag = false;
 
 function gainXp(){
     if (Player.xp + 2 >= Player.xpReq) {
@@ -39,11 +44,15 @@ function getLoot(){
 
 function switchScene(scene) {
     if (scene == ".mainScene") {
+        Player.lvlBefore = Player.level;
         initTimers();
-    } else {
+    } else if (scene == ".restScene") {
         clearInterval(mainTimer);
+        Player.lvlAfter = Player.level;
+        Player.rest();
+        intervalSpeed = _DEFAULT_SPEED;
     }
-    
+
     $('.restScene').css("display","none");
     $('.mainScene').css("display","none");
     $(scene).css("display","inline-block");
@@ -59,27 +68,21 @@ function msgBoxToggle(){
     }
 }
 
-function init(){
+function initPage(){
+
+    //3 Center panels & Message Box
+    $('<div>').addClass('gameContent').appendTo("#content");
+    $('<div>').addClass('infoPanel').text('Info').appendTo(".gameContent");
+    $('<div>').addClass('centerPanel').appendTo(".gameContent");
+    $('<div>').addClass('inventory').text('Inventory').appendTo(".gameContent");
     
-    $('<div>').addClass('menuTop').text('Placeholder').prependTo('body');   
-    $('<div>').addClass('messageBox').text('Hello?').appendTo("body");
-    $('<div>').addClass('options').appendTo("body");
-    $('<span>')
-        .addClass('showMsgBox')
-        .text('Show/Hide')
-        .click(msgBoxToggle)
-        .appendTo(".options");
-
-    //3 Center panels
-    $('<div>').addClass('infoPanel').text('Info').appendTo("#content");
-    $('<div>').addClass('centerPanel').appendTo("#content");
-    $('<div>').addClass('inventory').text('Inventory').appendTo("#content");
-
     //Render different things to appear in center panel.
     $('<div>').addClass('mainScene').appendTo('.centerPanel');
     $('<div>').addClass('restScene').appendTo('.centerPanel');
     $('<div>').attr("id","mainBar").appendTo(".mainScene");
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
+
+    $('<div>').addClass('messageBox').text('Messages').appendTo('.centerPanel');
 
     //Player Info
     $('<div>').addClass('gold').html('Gold: 0').appendTo('.infoPanel');
@@ -111,18 +114,15 @@ function init(){
 
 function initTimers(){
 
-    //var mainTimer2 = Timer.setTimer("#progressBarMain", defaultSpeed);
-
     mainTimer = window.setInterval(function(){
-        $("#progressBarMain").animate({width: '100%'}, defaultSpeed, 'linear', function(){
+        /*
+        $("#progressBarMain").animate({width: '100%'}, intervalSpeed, 'linear', function(){
             $("#progressBarMain").css("width", "0%");
         });
+        */
         onKill();
-    }, defaultSpeed);
+    }, intervalSpeed);
 
-    //console.log("MT1: " + mainTimer);
-    //console.log("MT2: " + mainTimer2);
-    //mainTimer = Timer.setTimer("#progressBarMain", defaultSpeed); //Main timer in middle
 }
 
 function initLootTables(){
@@ -149,17 +149,28 @@ function onKill(){
     if((Player.energy) > 0){
         clearInterval(mainTimer);
         Player.energy -= 5;
-        let speedMult = (defaultSpeed + (50 * (100 - Player.energy)));
+        intervalSpeed = (intervalSpeed + (25 * (100 - Player.energy)));
         mainTimer = window.setInterval(function(){
-            $("#progressBarMain").animate({width: '100%'}, speedMult, 'linear', function(){
+            /*
+            $("#progressBarMain").animate({width: '100%'}, intervalSpeed, 'linear', function(){
                 $("#progressBarMain").css("width", "0%");
             });
+            */
             onKill();
-        }, speedMult);
+        }, intervalSpeed);
         $('.energy').text("Energy: " + Player.energy + "%");
+        console.log(intervalSpeed);
     }
+
+    if (mainBarProg < 100) { 
+        mainBarProg += 10;
+        $("#progressBarMain").css("width", (mainBarProg + "%"))
+    } else {
+        taskCompleteFlag = true;
+    }
+    
 }
 
-init();
+initPage();
 initLootTables();
 //initTimers();
