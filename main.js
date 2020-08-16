@@ -8,6 +8,8 @@ var mainTimer = undefined;
 var mainBarProg = 0;
 var taskCompleteFlag = false;
 
+var newGame = true;
+
 function gainXp(){
     if (Player.xp + 2 >= Player.xpReq) {
         Player.level += 1;
@@ -51,8 +53,9 @@ function switchScene(scene) {
         Player.lvlAfter = Player.level;
         Player.rest();
         intervalSpeed = _DEFAULT_SPEED;
-    }
-
+    } 
+    
+    $('.startScene').css("display", "none");
     $('.restScene').css("display","none");
     $('.mainScene').css("display","none");
     $(scene).css("display","inline-block");
@@ -69,7 +72,8 @@ function msgBoxToggle(){
 }
 
 function initPage(){
-
+    //menu - append to top of center panel?
+    //$('<div>').addClass('menuBar').text("stuff").prependTo("#content");
     //3 Center panels & Message Box
     $('<div>').addClass('gameContent').appendTo("#content");
     $('<div>').addClass('infoPanel').text('Info').appendTo(".gameContent");
@@ -77,8 +81,11 @@ function initPage(){
     $('<div>').addClass('inventory').text('Inventory').appendTo(".gameContent");
     
     //Render different things to appear in center panel.
+    //Scenes
     $('<div>').addClass('mainScene').appendTo('.centerPanel');
     $('<div>').addClass('restScene').appendTo('.centerPanel');
+    $('<div>').addClass('startScene').appendTo('.centerPanel');
+    //Bars
     $('<div>').attr("id","mainBar").appendTo(".mainScene");
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
 
@@ -171,6 +178,42 @@ function onKill(){
     
 }
 
+function sendMessage(msg) {
+    $('<div>').addClass('msg').text(msg).prependTo('.messageBox');
+}
+
+function startGame() {
+    $('.restScene').css("display","none");
+    $('.startScene').css("display","inline-block");
+
+    $('<div>')
+        .addClass('btn')
+        .attr('id','start-btn')
+        .text('Wake up')
+        .click(function(){
+            sendMessage("You wake up.  It is dark.");
+            $('#start-btn')
+            .text('Listen')
+            .unbind('click')
+            .bind('click', function(){
+            sendMessage("You hear noises outside.");
+            $('#start-btn')
+                .text('Survive.')
+                .unbind('click')
+                .bind('click', function(){
+                sendMessage("It's chaos.");
+                switchScene(".mainScene");
+                })
+            })
+        })
+        .appendTo('.startScene');
+
+    
+}
+
 initPage();
 initLootTables();
+if (newGame) {
+    startGame();
+}
 //initTimers();

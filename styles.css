@@ -6,6 +6,10 @@
     border: 1px solid black;
 }
 
+.menuBar {
+    width: 90%;
+}
+
 .gameContent {
     border: 1px solid black;
     margin: 0 auto;
@@ -42,9 +46,15 @@
     position: absolute;
     bottom: 0;
     border: 1px solid black;
+    overflow: hidden;
 }
 
 /* SCENE STYLES */
+
+.startScene {
+    width: 100%;
+    display: none;
+}
 
 .mainScene {
     width: 100%;
