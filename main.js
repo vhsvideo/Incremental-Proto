@@ -55,6 +55,8 @@ function switchScene(scene) {
         intervalSpeed = _DEFAULT_SPEED;
     } 
     
+    $('.smithScene').css("display", "none");
+    $('.shopScene').css("display", "none");
     $('.startScene').css("display", "none");
     $('.restScene').css("display","none");
     $('.mainScene').css("display","none");
@@ -73,15 +75,18 @@ function msgBoxToggle(){
 
 function initPage(){
     //menu - append to top of center panel?
-    //$('<div>').addClass('menuBar').text("stuff").prependTo("#content");
+    $('<div>').addClass('menuBar').prependTo("#content");
     //3 Center panels & Message Box
     $('<div>').addClass('gameContent').appendTo("#content");
-    $('<div>').addClass('infoPanel').text('Info').appendTo(".gameContent");
+    $('<div>').addClass('infoPanel').appendTo(".gameContent");
+    $('<h1>').addClass('statsHeader').text('Stats').appendTo(".infoPanel");
     $('<div>').addClass('centerPanel').appendTo(".gameContent");
-    $('<div>').addClass('inventory').text('Inventory').appendTo(".gameContent");
+    $('<div>').addClass('inventory').appendTo(".gameContent");
+    $('<h1>').addClass('invHeader').text('Inventory').appendTo(".inventory");
     
-    //Render different things to appear in center panel.
     //Scenes
+    $('<div>').addClass('shopScene').appendTo('.centerPanel');
+    $('<div>').addClass('smithScene').appendTo('.centerPanel');
     $('<div>').addClass('mainScene').appendTo('.centerPanel');
     $('<div>').addClass('restScene').appendTo('.centerPanel');
     $('<div>').addClass('startScene').appendTo('.centerPanel');
@@ -89,12 +94,13 @@ function initPage(){
     $('<div>').attr("id","mainBar").appendTo(".mainScene");
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
 
-    $('<div>').addClass('messageBox').text('Messages').appendTo('.centerPanel');
+    $('<div>').addClass('messageBox').appendTo('.centerPanel');
 
     //Player Info
     $('<div>').addClass('gold').html('Gold: 0').appendTo('.infoPanel');
     $('<div>').addClass('xp').text('Experience: 0').appendTo('.infoPanel');
     $('<div>').addClass('level').text('Level: 1').appendTo('.infoPanel');
+    $('<h1>').addClass('attrHeader').text('Attributes').appendTo('.infoPanel');
     $('<div>').addClass('energy').text('Energy: 100%').appendTo('.infoPanel');
     $('<div>').addClass('str').text('Str: 10').appendTo('.infoPanel');
     $('<div>').addClass('dex').text('Dex: 10').appendTo('.infoPanel');
@@ -103,20 +109,27 @@ function initPage(){
     $('<div>').addClass('wis').text('Wis: 10').appendTo('.infoPanel');
     $('<div>').addClass('luk').text('Luk: 10').appendTo('.infoPanel');
 
-    //Buttons
+    //Menu Buttons
     $('<div>')
     .addClass('btn')
     .attr("id","btn-kill")
     .text('Kill')
     .click(function(){switchScene(".mainScene");})
-    .appendTo('.restScene');
+    .prependTo('.menuBar');
 
     $('<div>')
     .addClass('btn')
     .attr("id","btn-rest")
     .text('Rest')
     .click(function(){switchScene(".restScene");})
-    .appendTo('.mainScene')
+    .prependTo('.menuBar')
+
+    $('<div>')
+    .addClass('btn')
+    .attr("id","btn-smith")
+    .text('Smith')
+    .click(function(){switchScene(".smithScene");})
+    .prependTo('.menuBar')
 }
 
 function initTimers(){
@@ -146,7 +159,6 @@ function onKill(){
     Player.gold += 1;
     gainXp();
     getLoot();
-    
     
     $('.gold').text("Gold: " + Player.gold);
     $('.xp').text("Experience: " + Player.xp);
@@ -180,6 +192,7 @@ function onKill(){
 
 function sendMessage(msg) {
     $('<div>').addClass('msg').text(msg).prependTo('.messageBox');
+    $('.msg').animate({opacity: '100%'}, 500, 'linear');
 }
 
 function startGame() {
@@ -198,7 +211,7 @@ function startGame() {
             .bind('click', function(){
             sendMessage("You hear noises outside.");
             $('#start-btn')
-                .text('Survive.')
+                .text('Survive')
                 .unbind('click')
                 .bind('click', function(){
                 sendMessage("It's chaos.");
@@ -207,11 +220,18 @@ function startGame() {
             })
         })
         .appendTo('.startScene');
+}
 
-    
+function initSmith() {
+    $('<div>').addClass('btn-smith').text('Helm');
+    $('<div>').addClass('btn-smith').text('Body');
+    $('<div>').addClass('btn-smith').text('Gloves');
+    $('<div>').addClass('btn-smith').text('Legs');
+    $('<div>').addClass('btn-smith').text('Boots');
 }
 
 initPage();
+initSmith();
 initLootTables();
 if (newGame) {
     startGame();

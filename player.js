@@ -6,6 +6,9 @@ var Player = {
     lvlBefore: 1,
     lvlAfter: 1,
     energy: 100,
+    power: 6,
+    defense: 10,
+    
     inventory: {
         tooth: 0,
         pelt: 0,
@@ -25,7 +28,6 @@ var Player = {
         helm: "",
         body: "",
         gloves: "",
-        shoulder: "",
         legs: "",
         boots: "",
         wpn1: "",
