@@ -13,5 +13,5 @@ var Timer = {
 
     resetBar: function(barId) {
         $(barId).css("width", "0%");
-    },
+    }
 };

@@ -5,6 +5,10 @@
     width: 100%;
     height: 100%;
     margin: 0 auto;
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
 }
 
 .menuBar {
@@ -78,6 +82,7 @@
 
 .mainScene {
     width: 100%;
+    height: 80%;
     display: none;
 }
 
@@ -89,10 +94,9 @@
 /* PROGERSS BAR STYLES */
 
 #mainBar {
-    margin: 0 auto;
-    width: 99%;
+    margin: 70px auto;
+    width: 95%;
     background-color: lightgrey;
-    border: 1px solid black;
 }
 
 #progressBarMain {
@@ -112,9 +116,11 @@
     width: 100px;
     line-height: 30px;
     cursor: pointer;
+    background: white;
 }
 
 .btn:hover {
     text-decoration: underline;
 }
+
 
