@@ -6,13 +6,13 @@ var lootList = [];
 var intervalSpeed = 1000;
 var mainTimer = undefined;
 var mainTimerGoing = false;
-
+/*
 var taskProg = 0;
 var taskCompleteFlag = false;
 var maxTasks = 0;
 var onTask = false;
 var taskIncr = 0;
-var numTasks = 0;
+var numTasks = 0;*/
 
 var newGame = true;
 
@@ -75,10 +75,16 @@ function getLoot () {
                 $('#progressBarMain').css("width","0%");
             });
             }
+
             lootCount += 1;
         } else {
             clearInterval(mainTimer);
             initTimers();
+            $('.currentTask').text('Moving to next area...')
+            $('#progressBarMain')
+            .animate({width: '100%'}, intervalSpeed, 'linear', function(){
+                $('#progressBarMain').css("width","0%");
+            });
             console.log("Done?");
         }
     }, _DEFAULT_SPEED);
@@ -220,7 +226,7 @@ function onKill(){
     if((Player.energy) > 0){
         clearInterval(mainTimer);
         Player.energy -= 5;
-        intervalSpeed = (intervalSpeed + (15 * (100 - Player.energy)));
+        intervalSpeed = (intervalSpeed + (10 * (100 - Player.energy)));
         mainTimer = window.setInterval(function(){
             onKill();
         }, intervalSpeed);

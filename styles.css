@@ -73,6 +73,7 @@
 .msg {
     opacity: 0%;
 }
+
 /* SCENE STYLES */
 
 .startScene {
@@ -91,10 +92,13 @@
     display: inline-block;
 }
 
-/* PROGERSS BAR STYLES */
+/* TASK BAR STYLES */
+.currentTask {
+    margin: 70px 0 15px 0;
+}
 
 #mainBar {
-    margin: 70px auto;
+    margin: 0 auto;
     width: 95%;
     background-color: lightgrey;
 }
