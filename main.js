@@ -65,12 +65,6 @@ function getLoot () {
             }
 
             if (lootCount < Tasks.maxTasks){
-                /*
-                $('#progressBarMain')
-                .animate({width: '100%'}, 1000, 'linear', function(){
-                $('#progressBarMain').css("width","0%");
-                });*/
-                console.log("animte?")
                 move('#progressBarMain')
                 .set('width', '100%')
                 .duration(900)
@@ -83,13 +77,10 @@ function getLoot () {
             
         } else {
             clearInterval(mainTimer);
-            initTimers();
-            $('.currentTask').text('Moving to next area...')
-            /*
-            $('#progressBarMain')
-            .animate({width: '100%'}, intervalSpeed, 'linear', function(){
-                $('#progressBarMain').css("width","0%");
-            });*/
+            //Tasks.startTask();
+            //onKill();
+            //initTimers();
+            enterRoom();
             move('#progressBarMain')
                 .set('width', '100%')
                 .duration(intervalSpeed)
@@ -110,7 +101,7 @@ function switchScene(scene, btn) {
     if (scene == ".mainScene") {  // BUG - spam clicking Kill inits multiple timers.
         if (!mainTimerGoing){
             Player.lvlBefore = Player.level;
-            initTimers();
+            enterRoom();
         }
     } else if (scene == ".restScene") {
         mainTimerGoing = false;
@@ -211,7 +202,19 @@ function initTimers(){
         */
         onKill();
     }, intervalSpeed);
+}
 
+function enterRoom(){
+    Tasks.startTask();
+    mainTimerGoing = true;
+    mainTimer = window.setInterval(function(){
+        /*
+        $("#progressBarMain").animate({width: '100%'}, intervalSpeed, 'linear', function(){
+            $("#progressBarMain").css("width", "0%");
+        });
+        */
+        onKill();
+    }, intervalSpeed);
 }
 
 function initLootTables(){
@@ -225,13 +228,18 @@ function initLootTables(){
 }
 
 function onKill(){
-    Player.gold += 1;
-    gainXp();
-    //getLoot();
+    $('#progressBarMain').css("width","0%");
+
+    //So that it updates at end of progress bar.
+    if (Tasks.numTasks != 0) {
+        Player.gold += 1;
+        gainXp();
     
-    $('.gold').text("Gold: " + Player.gold);
-    $('.xp').text("Experience: " + Player.xp);
-    $('.energy').text("Energy: " + Player.energy + "%");
+        $('.gold').text("Gold: " + Player.gold);
+        $('.xp').text("Experience: " + Player.xp);
+        $('.energy').text("Energy: " + Player.energy + "%");
+    }
+    
 
     //Timer object function returns undefined - need to fix?  Maybe?
     if((Player.energy) > 0){
@@ -245,18 +253,21 @@ function onKill(){
         //console.log(intervalSpeed);
     }
 
-    if (Tasks.taskProg == 0 && Tasks.onTask == false) { 
-        Tasks.startTask();
-        Tasks.numTasks = 0;
-        Tasks.taskIncr = 100/Tasks.maxTasks;
-    } else if (Tasks.taskProg >= 0 && Tasks.taskProg < 100){
+    //Normally it might be fine to tie a callback function to the end of an animation
+    //But because inactive tabs slow down n do stupid stuff, have to make some adjustments
+    //!!BRING START TASKS OUT OF THIS BLOCK!!
+    if (Tasks.taskProg >= 0 && Tasks.taskProg < Tasks.maxTasks){
         console.log(Tasks.numTasks);
         Tasks.taskProg += Tasks.taskIncr;
         Tasks.numTasks += 1;
-        $("#progressBarMain").css("width", (Tasks.taskProg + "%"));
+        move('#progressBarMain')
+                .set('width', '100%')
+                .duration(900)
+                .end(function(){
+                    $('#progressBarMain').css("width","0%");
+                });
         $(".currentTask").text("Killing ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
     } else {
-        $("#progressBarMain").css("width", ("100%"));
         Tasks.onTask = false;
         Tasks.taskProg = 0;
         Tasks.taskCompleteFlag = true;
