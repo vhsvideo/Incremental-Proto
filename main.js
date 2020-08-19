@@ -1,20 +1,15 @@
 _DEFAULT_SPEED = 1000;
 _MIN_SPEED = 100;
+var lastUpdate = new Date().getTime();
+var newGame = true;
 
 var msgBoxShow = true;
 var lootList = [];
 var intervalSpeed = 1000;
 var mainTimer = undefined;
 var mainTimerGoing = false;
-/*
-var taskProg = 0;
-var taskCompleteFlag = false;
-var maxTasks = 0;
-var onTask = false;
-var taskIncr = 0;
-var numTasks = 0;*/
 
-var newGame = true;
+
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -70,21 +65,37 @@ function getLoot () {
             }
 
             if (lootCount < Tasks.maxTasks){
+                /*
                 $('#progressBarMain')
                 .animate({width: '100%'}, 1000, 'linear', function(){
                 $('#progressBarMain').css("width","0%");
-            });
+                });*/
+                console.log("animte?")
+                move('#progressBarMain')
+                .set('width', '100%')
+                .duration(900)
+                .end(function(){
+                    $('#progressBarMain').css("width","0%");
+                });
             }
 
             lootCount += 1;
+            
         } else {
             clearInterval(mainTimer);
             initTimers();
             $('.currentTask').text('Moving to next area...')
+            /*
             $('#progressBarMain')
             .animate({width: '100%'}, intervalSpeed, 'linear', function(){
                 $('#progressBarMain').css("width","0%");
-            });
+            });*/
+            move('#progressBarMain')
+                .set('width', '100%')
+                .duration(intervalSpeed)
+                .end(function(){
+                    $('#progressBarMain').css("width","0%");
+                });
             console.log("Done?");
         }
     }, _DEFAULT_SPEED);
@@ -226,7 +237,7 @@ function onKill(){
     if((Player.energy) > 0){
         clearInterval(mainTimer);
         Player.energy -= 5;
-        intervalSpeed = (intervalSpeed + (10 * (100 - Player.energy)));
+        //intervalSpeed = (intervalSpeed + (10 * (100 - Player.energy)));
         mainTimer = window.setInterval(function(){
             onKill();
         }, intervalSpeed);
