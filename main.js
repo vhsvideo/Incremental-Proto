@@ -29,6 +29,8 @@ function gainXp(){
 }
 
 //Maybe refactor this into the loot var?
+
+
 function rollLoot() {
     var i;
     
@@ -53,18 +55,17 @@ function rollLoot() {
 }
 
 function getLoot () {
-    $('#progressBarMain').css("width","0%");
-    $('.currentTask').text("Looting...");
-
-    var lootCount = 0;
+    /*
     mainTimer = setInterval(function(){
-        if (lootCount <= Tasks.maxTasks) {
-            if (lootCount > 0){
+        if (Tasks.numTasks <= Tasks.maxTasks) {
+            if (Tasks.numTasks > 0){
                 rollLoot();
                 console.log("Loot");
+                $('.currentTask')
+                .text("Looting... ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
             }
 
-            if (lootCount < Tasks.maxTasks){
+            if (Tasks.numTasks < Tasks.maxTasks){
                 move('#progressBarMain')
                 .set('width', '100%')
                 .duration(900)
@@ -73,13 +74,13 @@ function getLoot () {
                 });
             }
 
-            lootCount += 1;
+            Tasks.numTasks += 1;
             
         } else {
             clearInterval(mainTimer);
-            //Tasks.startTask();
-            //onKill();
-            //initTimers();
+            Tasks.isLooting = false;
+            Tasks.isKilling = true;
+            Tasks.resetTask();
             enterRoom();
             move('#progressBarMain')
                 .set('width', '100%')
@@ -90,6 +91,40 @@ function getLoot () {
             console.log("Done?");
         }
     }, _DEFAULT_SPEED);
+*/
+    if (Tasks.numTasks <= Tasks.maxTasks) {
+        if (Tasks.numTasks > 0){
+            rollLoot();
+            console.log("Loot");
+            $('.currentTask')
+            .text("Looting... ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
+        }
+
+        if (Tasks.numTasks < Tasks.maxTasks){
+            move('#progressBarMain')
+            .set('width', '100%')
+            .duration(900)
+            .end(function(){
+                $('#progressBarMain').css("width","0%");
+            });
+        }
+
+        Tasks.numTasks += 1;
+        
+    } else {
+        clearInterval(mainTimer);
+        Tasks.isLooting = false;
+        Tasks.isKilling = true;
+        Tasks.resetTask();
+        enterRoom();
+        move('#progressBarMain')
+            .set('width', '100%')
+            .duration(intervalSpeed)
+            .end(function(){
+                $('#progressBarMain').css("width","0%");
+            });
+        console.log("Done?");
+    }
 }
 
 function disableBtn(btn) {
@@ -101,6 +136,9 @@ function switchScene(scene, btn) {
     if (scene == ".mainScene") {  // BUG - spam clicking Kill inits multiple timers.
         if (!mainTimerGoing){
             Player.lvlBefore = Player.level;
+            if (Tasks.numTasks > 0) {
+                Tasks.numTasks -= 1;    //fixing some bug with how it counts up when switching
+            }
             enterRoom();
         }
     } else if (scene == ".restScene") {
@@ -192,29 +230,20 @@ function initPage(){
     .prependTo('.menuBar')
 }
 
-function initTimers(){
-    mainTimerGoing = true;
-    mainTimer = window.setInterval(function(){
-        /*
-        $("#progressBarMain").animate({width: '100%'}, intervalSpeed, 'linear', function(){
-            $("#progressBarMain").css("width", "0%");
-        });
-        */
-        onKill();
-    }, intervalSpeed);
-}
-
 function enterRoom(){
+    $('#progressBarMain').css("width","0%");
     Tasks.startTask();
     mainTimerGoing = true;
-    mainTimer = window.setInterval(function(){
-        /*
-        $("#progressBarMain").animate({width: '100%'}, intervalSpeed, 'linear', function(){
-            $("#progressBarMain").css("width", "0%");
-        });
-        */
-        onKill();
-    }, intervalSpeed);
+    if (Tasks.isLooting) {
+        mainTimer = window.setInterval(function(){
+            getLoot();
+        }, intervalSpeed);
+    } else {
+
+        mainTimer = window.setInterval(function(){
+            onKill();
+        }, intervalSpeed);
+    }
 }
 
 function initLootTables(){
@@ -228,9 +257,8 @@ function initLootTables(){
 }
 
 function onKill(){
-    $('#progressBarMain').css("width","0%");
-
     //So that it updates at end of progress bar.
+    Tasks.isKilling = true;
     if (Tasks.numTasks != 0) {
         Player.gold += 1;
         gainXp();
@@ -255,11 +283,9 @@ function onKill(){
 
     //Normally it might be fine to tie a callback function to the end of an animation
     //But because inactive tabs slow down n do stupid stuff, have to make some adjustments
-    //!!BRING START TASKS OUT OF THIS BLOCK!!
-    if (Tasks.taskProg >= 0 && Tasks.taskProg < Tasks.maxTasks){
+    if (Tasks.numTasks >= 0 && Tasks.numTasks < Tasks.maxTasks){
         console.log(Tasks.numTasks);
-        Tasks.taskProg += Tasks.taskIncr;
-        Tasks.numTasks += 1;
+        Tasks.numTasks += Tasks.taskIncr;
         move('#progressBarMain')
                 .set('width', '100%')
                 .duration(900)
@@ -268,11 +294,15 @@ function onKill(){
                 });
         $(".currentTask").text("Killing ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
     } else {
-        Tasks.onTask = false;
-        Tasks.taskProg = 0;
+        Tasks.numTasks = 0;
         Tasks.taskCompleteFlag = true;
         clearInterval(mainTimer);
-        getLoot();
+        Tasks.isKilling = false;
+        Tasks.isLooting = true;
+        Tasks.startTask();
+        mainTimer = window.setInterval(function(){
+            getLoot();
+        }, intervalSpeed);
         console.log("Task complete");
     }
     
