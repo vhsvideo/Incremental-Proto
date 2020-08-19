@@ -10,9 +10,6 @@ var Player = {
     defense: 10,
     
     inventory: {
-        tooth: 0,
-        pelt: 0,
-        "coin pouch": 0
     },
     
     stats: {

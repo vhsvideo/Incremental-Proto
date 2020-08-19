@@ -1,5 +1,4 @@
 var Tasks = {
-    taskProg: 0,
     taskCompleteFlag: false,
     maxTasks: 0,
     onTask: false,

@@ -30,7 +30,6 @@ function gainXp(){
 
 //Maybe refactor this into the loot var?
 
-
 function rollLoot() {
     var i;
     
@@ -55,43 +54,6 @@ function rollLoot() {
 }
 
 function getLoot () {
-    /*
-    mainTimer = setInterval(function(){
-        if (Tasks.numTasks <= Tasks.maxTasks) {
-            if (Tasks.numTasks > 0){
-                rollLoot();
-                console.log("Loot");
-                $('.currentTask')
-                .text("Looting... ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
-            }
-
-            if (Tasks.numTasks < Tasks.maxTasks){
-                move('#progressBarMain')
-                .set('width', '100%')
-                .duration(900)
-                .end(function(){
-                    $('#progressBarMain').css("width","0%");
-                });
-            }
-
-            Tasks.numTasks += 1;
-            
-        } else {
-            clearInterval(mainTimer);
-            Tasks.isLooting = false;
-            Tasks.isKilling = true;
-            Tasks.resetTask();
-            enterRoom();
-            move('#progressBarMain')
-                .set('width', '100%')
-                .duration(intervalSpeed)
-                .end(function(){
-                    $('#progressBarMain').css("width","0%");
-                });
-            console.log("Done?");
-        }
-    }, _DEFAULT_SPEED);
-*/
     if (Tasks.numTasks <= Tasks.maxTasks) {
         if (Tasks.numTasks > 0){
             rollLoot();
@@ -103,7 +65,7 @@ function getLoot () {
         if (Tasks.numTasks < Tasks.maxTasks){
             move('#progressBarMain')
             .set('width', '100%')
-            .duration(900)
+            .duration(900) //this is less because calling the same move before this is done doesnt play animation
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
@@ -158,6 +120,26 @@ function switchScene(scene, btn) {
     $(scene).css("display","inline-block");
 }
 
+function cookStuff() {
+    if (Player.inventory["raw meat"] > 0) {
+        Player.inventory["raw meat"] -= 1;
+        if(Player.inventory["raw meat"] - 1 == 0){
+            $('.rawmeat').remove();
+        } else {
+            $('.rawmeat').text(Player.inventory["raw meat"]+' raw meat');
+        }
+        if (Player.inventory.hasOwnProperty('rations')) {
+            Player.inventory.rations += 1;
+            $('.rations').text(Player.inventory.rations+" rations");
+        } else {
+            Player.inventory['rations'] = 1;
+            $('<div>').addClass('rations').text("1 rations").appendTo('.inventory');
+        }
+    } else {
+        sendMessage("No meat to cook with.");
+    }
+}
+
 function msgBoxToggle(){
     if (msgBoxShow){
         $(".messageBox").hide();
@@ -191,6 +173,14 @@ function initPage(){
     $('<div>').addClass('currentTask').appendTo('.mainScene')
     $('<div>').attr("id","mainBar").appendTo('.mainScene');
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
+    //Rest Scene stuff
+    $('<h1>').addClass('campTitle').text('Camp').appendTo('.restScene');
+    $('<div>')
+    .text('Cook')
+    .addClass('btn')
+    .attr("id","btn-cook")
+    .click(function(){cookStuff();})
+    .appendTo('.restScene');
 
     //Player Info
     $('<div>').addClass('gold').html('Gold: 0').appendTo('.infoPanel');
@@ -239,7 +229,6 @@ function enterRoom(){
             getLoot();
         }, intervalSpeed);
     } else {
-
         mainTimer = window.setInterval(function(){
             onKill();
         }, intervalSpeed);
@@ -253,6 +242,7 @@ function initLootTables(){
         loot.value = Loot.list.trash[l].value;
         loot.weight = Loot.list.trash[l].weight;
         lootList.push(loot);
+        Player.inventory[lootList[l].name] = 0;
     };
 }
 
@@ -292,7 +282,7 @@ function onKill(){
                 .end(function(){
                     $('#progressBarMain').css("width","0%");
                 });
-        $(".currentTask").text("Killing ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
+        $(".currentTask").text("Killing... ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
     } else {
         Tasks.numTasks = 0;
         Tasks.taskCompleteFlag = true;

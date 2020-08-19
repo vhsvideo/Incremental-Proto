@@ -25,7 +25,8 @@ var Equipment = {
         "Mail",
         "Pants",
         "Chausses",
-        "Cuisses"],
+        "Cuisses",
+        "Gambeson"],
 
     boots: ["Boots",
         "Sabatons",
