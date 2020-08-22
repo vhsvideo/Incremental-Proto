@@ -54,6 +54,10 @@
     font-size: 24px;
 }
 
+.equipHeader {
+    font-size: 24px;
+}
+
 .centerPanel {
     position: relative;
     width: 700px;
@@ -78,7 +82,7 @@
 
 .startScene {
     width: 100%;
-    display: none;
+    display: inline-block;
 }
 
 .mainScene {
@@ -89,7 +93,12 @@
 
 .restScene {
     width: 100%;
-    display: inline-block;
+    display: none;
+}
+
+.smithScene {
+    width: 100%;
+    display: none;
 }
 
 /* TASK BAR STYLES */

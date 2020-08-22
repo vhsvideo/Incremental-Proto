@@ -5,8 +5,9 @@ var Player = {
     level: 1,
     lvlBefore: 1,
     lvlAfter: 1,
+    lvlDiff: 0,
     energy: 100,
-    power: 6,
+    power: 10,
     defense: 10,
     
     inventory: {
@@ -22,13 +23,13 @@ var Player = {
     },
 
     equipment: {
-        helm: "",
-        body: "",
-        gloves: "",
-        legs: "",
-        boots: "",
-        wpn1: "",
-        wpn2: ""
+        helm: undefined,
+        body: undefined,
+        gloves: undefined,
+        legs: undefined,
+        boots: undefined,
+        wpn1: undefined,
+        wpn2: undefined
     },
 
     rest: function(){

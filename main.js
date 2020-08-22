@@ -188,7 +188,7 @@ function initPage(){
     $('<div>').addClass('level').text('Level: 1').appendTo('.infoPanel');
     $('<h1>').addClass('attrHeader').text('Attributes').appendTo('.infoPanel');
     $('<div>').addClass('energy').text('Energy: 100%').appendTo('.infoPanel');
-    $('<div>').addClass('power').text('Power: 6').appendTo('.infoPanel');
+    $('<div>').addClass('power').text('Power: 10').appendTo('.infoPanel');
     $('<div>').addClass('defense').text('Defense: 10').appendTo('.infoPanel');
     $('<div>').addClass('str').text('Str: 10').appendTo('.infoPanel');
     $('<div>').addClass('dex').text('Dex: 10').appendTo('.infoPanel');
@@ -196,6 +196,14 @@ function initPage(){
     $('<div>').addClass('con').text('Con: 10').appendTo('.infoPanel');
     $('<div>').addClass('wis').text('Wis: 10').appendTo('.infoPanel');
     $('<div>').addClass('luk').text('Luk: 10').appendTo('.infoPanel');
+    $('<h1>').addClass('equipHeader').text('Equipment').appendTo('.infoPanel');
+    $('<div>').addClass('helm').text('Helm: ').appendTo('.infoPanel');
+    $('<div>').addClass('body').text('Body: ').appendTo('.infoPanel');
+    $('<div>').addClass('gloves').text('Gloves: ').appendTo('.infoPanel');
+    $('<div>').addClass('legs').text('Legs: ').appendTo('.infoPanel');
+    $('<div>').addClass('boots').text('Boots: ').appendTo('.infoPanel');
+    $('<div>').addClass('wpn1').text('Weapon: ').appendTo('.infoPanel');
+    $('<div>').addClass('wpn2').text('Off-hand: ').appendTo('.infoPanel');
 
     //Menu Buttons
     $('<div>')
@@ -330,12 +338,31 @@ function startGame() {
         .appendTo('.startScene');
 }
 
+function addButton (id, text, scene, clickFunc) {
+    $('<div>')
+    .addClass('btn')
+    .attr("id", id)
+    .text(text)
+    .click(clickFunc)
+    .appendTo(scene);
+}
+
 function initSmith() {
-    $('<div>').addClass('btn-smith').text('Helm');
-    $('<div>').addClass('btn-smith').text('Body');
-    $('<div>').addClass('btn-smith').text('Gloves');
-    $('<div>').addClass('btn-smith').text('Legs');
-    $('<div>').addClass('btn-smith').text('Boots');
+    /*
+    $('<div>')
+    .addClass('btn').text('Helm').appendTo('.smithScene');
+    $('<div>')
+    .addClass('btn').text('Body').appendTo('.smithScene');
+    $('<div>')
+    .addClass('btn').text('Gloves').appendTo('.smithScene');
+    $('<div>')
+    .addClass('btn').text('Legs').appendTo('.smithScene');
+    $('<div>')
+    .addClass('btn').text('Boots').appendTo('.smithScene');
+    */
+    //Equipment.make('helm');
+    addButton("btn-helm","Helm",'.smithScene',
+    function() {Equipment.buy('helm')});
 }
 
 initPage();
