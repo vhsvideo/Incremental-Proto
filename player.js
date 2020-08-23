@@ -9,6 +9,7 @@ var Player = {
     energy: 100,
     power: 10,
     defense: 10,
+    renown: 0,
     
     inventory: {
     },

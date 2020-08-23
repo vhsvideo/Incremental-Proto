@@ -48,7 +48,7 @@ var Equipment = {
 
     getName: function (equipSlot, rarity) {
         var i;
-        let randomChoice = getRandomInt(0, Equipment[equipSlot].length);
+        let randomChoice = getRandomInt(0, (Equipment[equipSlot].length - 1));
         let base = "";
         let prefix = "";
         for (i = 0; i < Equipment[equipSlot].length; i++) {
@@ -63,7 +63,7 @@ var Equipment = {
                 prefix = "Poor";
                 break;
             case ('uncommon'):
-                prefix = "";
+                prefix = "Tempered";
                 break;
             case ('rare'):
                 prefix = "Glowing"
@@ -72,7 +72,7 @@ var Equipment = {
                 prefix = "Shining"
                 break;
             case ('legendary'):
-                prefix = "Historic"
+                prefix = "Ancient"
         }
 
         return prefix +" "+ base;
@@ -127,7 +127,7 @@ var Equipment = {
         let rarity = this.getRarity();
         let ilvl = 1;
         if (typeof Player.equipment[equipSlot] != 'undefined') {
-            ilvl = Math.ceil(Player.equipment[equipSlot].ilvl * this.getRarityMod(rarity));
+            ilvl = Math.ceil(Player.equipment[equipSlot].ilvl + this.getRarityMod(rarity));
         } else {
             ilvl = 2;
         }
@@ -138,7 +138,6 @@ var Equipment = {
         });
 
         let powerMod = this.calcPowerMod(equipSlot, equipment);
-
 
         equipment.power = powerMod;  //change these to have some variance?
         equipment.defense = powerMod;
@@ -153,16 +152,39 @@ var Equipment = {
     },
 
     buy: function(equipSlot) {
-        var value = 0;  // do math to scale this
+        var value = 0;  // do math to scale this, and do it for each equipment serparately?
+        let name = "";
         if (Player.gold < value) {
             sendMessage('Not enough gold.');
         } else {
             switch (equipSlot) {
                 case 'helm':
-                    console.log('Helm buy');
                     Player.gold -= value;
-                    let name = this.make('helm');
+                    name = this.make('helm');
                     $('.helm').text("Helm: "+name);
+                    console.log(Player.equipment['helm'].ilvl)
+                    break;
+                case 'body':
+                    Player.gold -= value;
+                    name = this.make('body');
+                    $('.body').text("Body: "+name);
+                    console.log(Player.equipment['body'].ilvl)
+                    console.log(Equipment.ilvl)
+                    break;
+                case 'gloves':
+                    Player.gold -= value;
+                    name = this.make('gloves');
+                    $('.gloves').text("Gloves: "+name);
+                    break;
+                case 'legs':
+                    Player.gold -= value;
+                    name = this.make('legs');
+                    $('.legs').text("Legs: "+name);
+                    break;
+                case 'boots':
+                    Player.gold -= value;
+                    name = this.make('boots');
+                    $('.boots').text("Boots: "+name);
                     break;
                 default: 
                     console.log("Didn't work");

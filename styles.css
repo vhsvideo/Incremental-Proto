@@ -101,6 +101,11 @@
     display: none;
 }
 
+.taskScene {
+    width: 100%;
+    display: none;
+}
+
 /* TASK BAR STYLES */
 .currentTask {
     margin: 70px 0 15px 0;

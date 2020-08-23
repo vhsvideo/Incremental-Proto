@@ -7,6 +7,7 @@ var msgBoxShow = true;
 var lootList = [];
 var intervalSpeed = 1000;
 var mainTimer = undefined;
+var taskTimer = undefined;
 var mainTimerGoing = false;
 
 
@@ -62,7 +63,7 @@ function getLoot () {
             .text("Looting... ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
         }
 
-        if (Tasks.numTasks < Tasks.maxTasks){
+        if (Tasks.numTasks <= Tasks.maxTasks){
             move('#progressBarMain')
             .set('width', '100%')
             .duration(900) //this is less because calling the same move before this is done doesnt play animation
@@ -95,13 +96,13 @@ function disableBtn(btn) {
 }
 
 function switchScene(scene, btn) {
-    if (scene == ".mainScene") {  // BUG - spam clicking Kill inits multiple timers.
+    //Make this switch/case?
+    if (scene == ".mainScene") { 
         if (!mainTimerGoing){
             Player.lvlBefore = Player.level;
             if (Tasks.numTasks > 0) {
                 Tasks.numTasks -= 1;    //fixing some bug with how it counts up when switching
             }
-            enterRoom();
         }
     } else if (scene == ".restScene") {
         mainTimerGoing = false;
@@ -109,8 +110,9 @@ function switchScene(scene, btn) {
         Player.lvlAfter = Player.level;
         Player.rest();
         intervalSpeed = _DEFAULT_SPEED;
-    } 
+    }
     
+    $('.taskScene').css("display","none");
     $('.smithScene').css("display", "none");
     $('.shopScene').css("display", "none");
     $('.startScene').css("display", "none");
@@ -169,10 +171,14 @@ function initPage(){
     $('<div>').addClass('mainScene').appendTo('.centerPanel');
     $('<div>').addClass('restScene').appendTo('.centerPanel');
     $('<div>').addClass('startScene').appendTo('.centerPanel');
+    $('<div>').addClass('taskScene').appendTo('.centerPanel');
+
     //Main Scene Task stuf
+    $('<h1>').addClass('areaHeader').text('Area 1').appendTo('.mainScene')
     $('<div>').addClass('currentTask').appendTo('.mainScene')
     $('<div>').attr("id","mainBar").appendTo('.mainScene');
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
+
     //Rest Scene stuff
     $('<h1>').addClass('campTitle').text('Camp').appendTo('.restScene');
     $('<div>')
@@ -181,6 +187,15 @@ function initPage(){
     .attr("id","btn-cook")
     .click(function(){cookStuff();})
     .appendTo('.restScene');
+
+    //Task/Area scene stuff
+    //addButton("btn-f1","Floor 1",'.taskScene', function(){Tasks.initTask(0)});
+    $('<div>')
+    .addClass('btn')
+    .attr("id","btn-f1")
+    .text('Floor 1')
+    .click(function(){Tasks.initTask(0);})
+    .appendTo('.taskScene');
 
     //Player Info
     $('<div>').addClass('gold').html('Gold: 0').appendTo('.infoPanel');
@@ -218,14 +233,21 @@ function initPage(){
     .attr("id","btn-rest")
     .text('Rest')
     .click(function(){switchScene(".restScene", "#btn-rest");})
-    .prependTo('.menuBar')
+    .prependTo('.menuBar');
 
     $('<div>')
     .addClass('btn')
     .attr("id","btn-smith")
     .text('Smith')
     .click(function(){switchScene(".smithScene", "#btn-smith");})
-    .prependTo('.menuBar')
+    .prependTo('.menuBar');
+
+    $('<div>')
+    .addClass('btn')
+    .attr("id","btn-tasks")
+    .text('Journey')
+    .click(function(){switchScene(".taskScene","#btn-tasks");})
+    .prependTo('.menuBar');
 }
 
 function enterRoom(){
@@ -330,8 +352,8 @@ function startGame() {
                 .text('Survive')
                 .unbind('click')
                 .bind('click', function(){
-                sendMessage("It's chaos.");
-                switchScene(".mainScene");
+                sendMessage("You escape.");
+                switchScene(".taskScene");
                 })
             })
         })
@@ -348,26 +370,93 @@ function addButton (id, text, scene, clickFunc) {
 }
 
 function initSmith() {
-    /*
-    $('<div>')
-    .addClass('btn').text('Helm').appendTo('.smithScene');
-    $('<div>')
-    .addClass('btn').text('Body').appendTo('.smithScene');
-    $('<div>')
-    .addClass('btn').text('Gloves').appendTo('.smithScene');
-    $('<div>')
-    .addClass('btn').text('Legs').appendTo('.smithScene');
-    $('<div>')
-    .addClass('btn').text('Boots').appendTo('.smithScene');
-    */
-    //Equipment.make('helm');
     addButton("btn-helm","Helm",'.smithScene',
     function() {Equipment.buy('helm')});
+    addButton("btn-body","Body",'.smithScene',
+    function() {Equipment.buy('body')});
+    addButton("btn-gloves","Gloves",'.smithScene',
+    function() {Equipment.buy('gloves')});
+    addButton("btn-legs","Legs",'.smithScene',
+    function() {Equipment.buy('legs')});
+    addButton("btn-boots","Boots",'.smithScene',
+    function() {Equipment.buy('boots')});
 }
+
+function updateLoot(task) {
+    task.numTasks += 1;
+    rollLoot(); //might need to update for task-dependent loot tables
+
+    if(task.numTasks <= task.maxTasks) {
+        $('.currentTask')
+            .text("Looting... ("+task.numTasks+"/"+task.maxTasks+")");
+        move('#progressBarMain')
+            .set('width', '100%')
+            .duration(900)
+            .end(function(){
+                $('#progressBarMain').css("width","0%");
+            });
+        taskTimer = setTimeout(function(){updateLoot(task);}, 1000);
+    } else {
+        //taskStage++; //for implementing bosses etc.
+        task.numTasks = 1;
+        task.maxTasks = getRandomInt(3,11);
+        task.isKilling = true;
+        task.isLooting = false;
+        $('.currentTask')
+            .text("Killing... ("+task.numTasks+"/"+task.maxTasks+")");
+        move('#progressBarMain')
+            .set('width', '100%')
+            .duration(900)
+            .end(function(){
+                $('#progressBarMain').css("width","0%");
+            });
+        taskTimer = setTimeout(function(){updateKill(task);}, 1000);
+    }
+}
+
+function updateKill(task) {
+    task.numTasks += 1;
+
+    /* UPDATE PLAYER STATS*/
+    Player.gold += 1;
+    gainXp();
+    $('.gold').text("Gold: " + Player.gold);
+    $('.xp').text("Experience: " + Player.xp);
+    $('.energy').text("Energy: " + Player.energy + "%");
+    /* UPDATE PLAYER STATS*/
+
+    if(task.numTasks <= task.maxTasks) {
+        $('.currentTask')
+            .text("Killing... ("+task.numTasks+"/"+task.maxTasks+")");
+        move('#progressBarMain')
+            .set('width', '100%')
+            .duration(900)
+            .end(function(){
+                $('#progressBarMain').css("width","0%");
+            });
+        taskTimer = setTimeout(function(){updateKill(task);}, 1000);
+    } else {
+        task.numTasks = 1;
+        task.isKilling = false;
+        task.isLooting = true;
+        $('.currentTask')
+            .text("Looting... ("+task.numTasks+"/"+task.maxTasks+")");
+        move('#progressBarMain')
+            .set('width', '100%')
+            .duration(900)
+            .end(function(){
+                $('#progressBarMain').css("width","0%");
+            });
+        taskTimer = setTimeout(function(){updateLoot(task);}, 1000);
+    }
+}
+
+//Tasks.initTask(0);
+
 
 initPage();
 initSmith();
-initLootTables();
+initLootTables(); //might need to move this to be area dependent
 if (newGame) {
     startGame();
 }
