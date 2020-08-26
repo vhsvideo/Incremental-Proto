@@ -79,9 +79,10 @@ var Equipment = {
     },
 
     getRarity: function() {
-        let rareRoll = Math.random();
+        let rareRoll = Math.floor(Math.random()*100) / 100
 
         if (rareRoll <= 0.03) {
+            console.log("Legendary: "+rareRoll);
             return 'legendary';
         } else if (rareRoll > 0.03 && rareRoll <= 0.10) {
             return 'epic';

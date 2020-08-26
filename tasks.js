@@ -6,6 +6,8 @@ var Tasks = {
     onTask: false,
     isKilling: false,
     isLooting: false,
+    isBoss: false,
+    bossPower: 10,
     taskIncr: 1,
     numTasks: 0,
     tasksComplete: 0,
@@ -19,6 +21,8 @@ var Tasks = {
         this.onTask = options.onTask;
         this.isKilling = options.isKilling;
         this.isLooting = options.isLooting;
+        this.isBoss = options.isBoss;
+        this.bossPower = options.bossPower;
         this.taskIncr = options.taskIncr;
         this.numTasks = options.numTasks;
     },
@@ -26,16 +30,17 @@ var Tasks = {
     startNewTask: function() {
         let task = new Tasks.Task({
             taskName: ("Floor"+(this.tasksComplete + 1)),
-            taskStage: this.tasksComplete + 1,
+            taskStage: 0,
             taskIncr: 1,
             maxTasks: 0,
             numTasks: 1,
             taskCompleteFlag: false,
             onTask: false,
             isKilling: false,
-            isLooting: false
-        })
-
+            isLooting: false,
+            isBoss: false,
+            bossPower: 10
+        });
         this.taskList.push(task);
     },
 
@@ -43,13 +48,14 @@ var Tasks = {
         if (typeof this.taskList[id] == 'undefined') {
             this.startNewTask();
         }
-        switchScene('.mainScene');
+        //switchScene('.mainScene');
+        
         let task = this.taskList[id];
 
-        if (!(task.isLooting && task.isKilling)){ //if it's a new task
+        if ((task.isLooting == false) && (task.isKilling == false) && (task.isBoss == false)){ //if it's a new task
             task.isKilling = true;
             task.maxTasks = getRandomInt(3, 10);
-            $('#progressBarMain').css("width","0%");
+
             $('.currentTask')
             .text("Killing... ("+task.numTasks+"/"+task.maxTasks+")");
             this.doTask(task);
@@ -64,50 +70,13 @@ var Tasks = {
         }
     },
 
+    //this could be used on the main game loop - keep track of calls?  date.now shenanigans? etc.
     doTask: function(task) {
+        clearTimeout(taskTimer);
         if (task.isKilling) {
-            /*
-            move('#progressBarMain')
-                .set('width', '100%')
-                .duration(900)
-                .end(function(){
-                    $('#progressBarMain').css("width","0%");
-                });*/
             taskTimer = setTimeout(function(){updateKill(task);}, 1000);
-        } else {
-            /*
-            move('#progressBarMain')
-                .set('width', '100%')
-                .duration(900)
-                .end(function(){
-                    $('#progressBarMain').css("width","0%");
-                });*/
+        } else if (task.isLooting){
             taskTimer = setTimeout(function(){updateLoot(task);}, 1000);
         }
     },
-    
-    startTask: function() {
-        if (this.isKilling) {
-            $('#progressBarMain').css("width","0%");
-            $('.currentTask')
-            .text("Killing... ("+this.numTasks+"/"+Tasks.maxTasks+")");
-        } else if (this.isLooting) {
-            $('#progressBarMain').css("width","0%");
-            $('.currentTask')
-            .text("Looting... ("+this.numTasks+"/"+Tasks.maxTasks+")");
-        } else {
-            this.numTasks = 0;
-            this.maxTasks = getRandomInt(2,10);
-            this.taskCompleteFlag = false;
-            this.onTask = true;
-            $('.currentTask').text("Killing (0/" + this.maxTasks + ")");
-        }
-    },
-
-    resetTask: function() {
-        this.numTasks = 0;
-        this.maxTasks = getRandomInt(2,10);
-        this.taskCompleteFlag = false;
-        this.onTask = true;
-    }
 }

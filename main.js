@@ -35,7 +35,7 @@ function rollLoot() {
     var i;
     
     for(i = 0; i < (lootList.length); i++) {
-        var roll = Math.random();
+        var roll = (Math.floor(Math.random()*100) / 100);
         if (roll <= lootList[i].weight) {
             var item = lootList[i].name;
             item = item.replace(/\s+/g, '');    //remove spaces for class
@@ -54,64 +54,31 @@ function rollLoot() {
     }
 }
 
-function getLoot () {
-    if (Tasks.numTasks <= Tasks.maxTasks) {
-        if (Tasks.numTasks > 0){
-            rollLoot();
-            console.log("Loot");
-            $('.currentTask')
-            .text("Looting... ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
-        }
-
-        if (Tasks.numTasks <= Tasks.maxTasks){
-            move('#progressBarMain')
-            .set('width', '100%')
-            .duration(900) //this is less because calling the same move before this is done doesnt play animation
-            .end(function(){
-                $('#progressBarMain').css("width","0%");
-            });
-        }
-
-        Tasks.numTasks += 1;
-        
-    } else {
-        clearInterval(mainTimer);
-        Tasks.isLooting = false;
-        Tasks.isKilling = true;
-        Tasks.resetTask();
-        enterRoom();
-        move('#progressBarMain')
-            .set('width', '100%')
-            .duration(intervalSpeed)
-            .end(function(){
-                $('#progressBarMain').css("width","0%");
-            });
-        console.log("Done?");
-    }
-}
-
 function disableBtn(btn) {
     $(btn).css({"opacity": "50%", "cursor": "context-menu"})
     .unbind('click');
 }
 
-function switchScene(scene, btn) {
+function switchScene(scene, btnId, taskInd) {
     //Make this switch/case?
-    if (scene == ".mainScene") { 
-        if (!mainTimerGoing){
-            Player.lvlBefore = Player.level;
-            if (Tasks.numTasks > 0) {
-                Tasks.numTasks -= 1;    //fixing some bug with how it counts up when switching
-            }
-        }
+    if (scene == ".mainScene") {
+        $('#progressBarMain').css("width", "0%");
+        $('#progressBarMain').animate({width: '100%'}, 800, 'linear', function(){
+            $('#progressBarMain').css("width", "0%");
+        });  //temporary fix, move for some reason breaks at first scene
+        Tasks.initTask(taskInd); 
     } else if (scene == ".restScene") {
         mainTimerGoing = false;
-        clearInterval(mainTimer);
+        clearTimeout(taskTimer);
         Player.lvlAfter = Player.level;
         Player.rest();
         intervalSpeed = _DEFAULT_SPEED;
+    } else if (scene == ".smithScene") {
+        clearTimeout(taskTimer);
+    } else if (scene == ".taskScene") {
+        clearTimeout(taskTimer);
     }
-    
+
     $('.taskScene').css("display","none");
     $('.smithScene').css("display", "none");
     $('.shopScene').css("display", "none");
@@ -174,10 +141,11 @@ function initPage(){
     $('<div>').addClass('taskScene').appendTo('.centerPanel');
 
     //Main Scene Task stuf
-    $('<h1>').addClass('areaHeader').text('Area 1').appendTo('.mainScene')
+    $('<h1>').addClass('areaHeader').text('Floor 1').appendTo('.mainScene')
     $('<div>').addClass('currentTask').appendTo('.mainScene')
     $('<div>').attr("id","mainBar").appendTo('.mainScene');
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
+    $('<div>').addClass('timer').attr("id","timer").appendTo('.mainScene');
 
     //Rest Scene stuff
     $('<h1>').addClass('campTitle').text('Camp').appendTo('.restScene');
@@ -194,7 +162,7 @@ function initPage(){
     .addClass('btn')
     .attr("id","btn-f1")
     .text('Floor 1')
-    .click(function(){Tasks.initTask(0);})
+    .click(function(){switchScene('.mainScene', "btn-f1",0)})
     .appendTo('.taskScene');
 
     //Player Info
@@ -245,24 +213,16 @@ function initPage(){
     $('<div>')
     .addClass('btn')
     .attr("id","btn-tasks")
-    .text('Journey')
+    .text('Tower')
     .click(function(){switchScene(".taskScene","#btn-tasks");})
     .prependTo('.menuBar');
-}
 
-function enterRoom(){
-    $('#progressBarMain').css("width","0%");
-    Tasks.startTask();
-    mainTimerGoing = true;
-    if (Tasks.isLooting) {
-        mainTimer = window.setInterval(function(){
-            getLoot();
-        }, intervalSpeed);
-    } else {
-        mainTimer = window.setInterval(function(){
-            onKill();
-        }, intervalSpeed);
-    }
+    Tasks.startNewTask();
+    let task = Tasks.taskList[0];
+    addButton("btn-boss","Fight Boss",".startScene",function(){
+        switchScene('.mainScene', 'btn-boss',0);
+        fightBoss(task);
+    });
 }
 
 function initLootTables(){
@@ -276,58 +236,6 @@ function initLootTables(){
     };
 }
 
-function onKill(){
-    //So that it updates at end of progress bar.
-    Tasks.isKilling = true;
-    if (Tasks.numTasks != 0) {
-        Player.gold += 1;
-        gainXp();
-    
-        $('.gold').text("Gold: " + Player.gold);
-        $('.xp').text("Experience: " + Player.xp);
-        $('.energy').text("Energy: " + Player.energy + "%");
-    }
-    
-
-    //Timer object function returns undefined - need to fix?  Maybe?
-    if((Player.energy) > 0){
-        clearInterval(mainTimer);
-        Player.energy -= 5;
-        //intervalSpeed = (intervalSpeed + (10 * (100 - Player.energy)));
-        mainTimer = window.setInterval(function(){
-            onKill();
-        }, intervalSpeed);
-        $('.energy').text("Energy: " + Player.energy + "%");
-        //console.log(intervalSpeed);
-    }
-
-    //Normally it might be fine to tie a callback function to the end of an animation
-    //But because inactive tabs slow down n do stupid stuff, have to make some adjustments
-    if (Tasks.numTasks >= 0 && Tasks.numTasks < Tasks.maxTasks){
-        console.log(Tasks.numTasks);
-        Tasks.numTasks += Tasks.taskIncr;
-        move('#progressBarMain')
-                .set('width', '100%')
-                .duration(900)
-                .end(function(){
-                    $('#progressBarMain').css("width","0%");
-                });
-        $(".currentTask").text("Killing... ("+Tasks.numTasks+"/"+Tasks.maxTasks+")");
-    } else {
-        Tasks.numTasks = 0;
-        Tasks.taskCompleteFlag = true;
-        clearInterval(mainTimer);
-        Tasks.isKilling = false;
-        Tasks.isLooting = true;
-        Tasks.startTask();
-        mainTimer = window.setInterval(function(){
-            getLoot();
-        }, intervalSpeed);
-        console.log("Task complete");
-    }
-    
-}
-
 function sendMessage(msg) {
     $('<div>').addClass('msg').text(msg).prependTo('.messageBox');
     $('.msg').animate({opacity: '100%'}, 500, 'linear');
@@ -336,6 +244,9 @@ function sendMessage(msg) {
 function startGame() {
     $('.restScene').css("display","none");
     $('.startScene').css("display","inline-block");
+    /*
+    $('.mainScene').css("display","inline-block");
+    Tasks.initTask(0);*/
 
     $('<div>')
         .addClass('btn')
@@ -389,28 +300,41 @@ function updateLoot(task) {
     if(task.numTasks <= task.maxTasks) {
         $('.currentTask')
             .text("Looting... ("+task.numTasks+"/"+task.maxTasks+")");
+        
         move('#progressBarMain')
             .set('width', '100%')
             .duration(900)
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        taskTimer = setTimeout(function(){updateLoot(task);}, 1000);
+        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
+        Tasks.doTask(task);
     } else {
-        //taskStage++; //for implementing bosses etc.
+        if (task.taskStage < 0){
+            task.taskStage += 1;
+        } else if (task.taskStage == 0) {
+            task.taskStage += 1;
+            task.taskCompleteFlag = true;
+            sendMessage("You find a staircase heading upward.");
+            addButton("btn-boss","Fight Boss",".mainScene",function(){
+                fightBoss(task);
+            })
+        }
         task.numTasks = 1;
         task.maxTasks = getRandomInt(3,11);
         task.isKilling = true;
         task.isLooting = false;
         $('.currentTask')
             .text("Killing... ("+task.numTasks+"/"+task.maxTasks+")");
+            
         move('#progressBarMain')
             .set('width', '100%')
             .duration(900)
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        taskTimer = setTimeout(function(){updateKill(task);}, 1000);
+        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
+        Tasks.doTask(task);
     }
 }
 
@@ -434,7 +358,8 @@ function updateKill(task) {
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        taskTimer = setTimeout(function(){updateKill(task);}, 1000);
+        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
+        Tasks.doTask(task);
     } else {
         task.numTasks = 1;
         task.isKilling = false;
@@ -447,11 +372,42 @@ function updateKill(task) {
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        taskTimer = setTimeout(function(){updateLoot(task);}, 1000);
+        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
+        Tasks.doTask(task);
     }
 }
 
-//Tasks.initTask(0);
+function fightBoss(task) {
+     //need to remove when boss is done?
+    clearTimeout(taskTimer);
+    $('#btn-boss').remove();
+    $('.timer').css("display","inline-block")
+    $('.currentTask')
+        .text("Boss");
+
+    if (Player.power <= task.bossPower) {
+        $('#progressBarMain').css("width","100%");
+        sendMessage("You don't feel powerful enough to defeat this boss.");
+    } else {
+        //Timer.setTimer(60);
+    }
+    Timer.setTimer(600); //XX.X seconds
+    console.log("Count outer: "+Timer.count);
+    /*
+    move('#progressBarMain')
+        .set('width', '100%')
+        .duration(900)
+        .end(function(){
+            $('#progressBarMain').css("width","0%");
+        });*/
+        //taskTimer = setTimeout(function(){updateKill(task);}, 1000);
+}
+
+function displayCount(count) {
+    var res = count / 10;
+    $('.timer').text(res + ' secs')
+    //document.getElementById("timer").innerHTML = res.toPrecision(count.toString().length) + " secs";
+}
 
 
 initPage();
@@ -460,4 +416,3 @@ initLootTables(); //might need to move this to be area dependent
 if (newGame) {
     startGame();
 }
-//initTimers();

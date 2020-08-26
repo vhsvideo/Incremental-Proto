@@ -1,17 +1,24 @@
 var Timer = {
-    setTimer: function(barId, speed, callback) {
-        //Can't put function at the end of animate, cause animation suspends when tab is inactive
-        //Can't clear interval - doesn't return right id?  try let?
-        window.setInterval(function(){
-            $(barId).animate({width: '100%'}, speed, 'linear', function(){
-                $(barId).css("width", "0%");
-            });
-            onKill();
-        }, speed);
-        
+    initial: 30000,
+    count: 0,
+    counter: undefined, //10 will  run it every 100th of a second
+    initialMillis: undefined,
+
+    countdown: function(){
+        console.log("Count inner: "+Timer.count);
+        if (Timer.count <= 0) {
+            clearInterval(Timer.counter);
+            return;
+        }
+        Timer.count--;
+        displayCount(Timer.count);
     },
 
-    resetBar: function(barId) {
-        $(barId).css("width", "0%");
+    setTimer: function(startTime){
+        this.initial = startTime;
+        this.count = startTime;
+        this.initialMillis = startTime;
+        console.log("Count: "+this.count);
+        this.counter = setInterval(this.countdown, 100);
     }
 };

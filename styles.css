@@ -123,6 +123,10 @@
     background-color: blue;
 }
 
+#timer {
+    display: none;
+}
+
 /* BUTTON STYLES */
 
 .btn {
