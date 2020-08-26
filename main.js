@@ -85,6 +85,7 @@ function switchScene(scene, btnId, taskInd) {
     $('.startScene').css("display", "none");
     $('.restScene').css("display","none");
     $('.mainScene').css("display","none");
+    $('.bossScene').css("display","none");
     //disableBtn(btn);
     $(scene).css("display","inline-block");
 }
@@ -139,13 +140,20 @@ function initPage(){
     $('<div>').addClass('restScene').appendTo('.centerPanel');
     $('<div>').addClass('startScene').appendTo('.centerPanel');
     $('<div>').addClass('taskScene').appendTo('.centerPanel');
+    $('<div>').addClass('bossScene').appendTo('.centerPanel');
 
-    //Main Scene Task stuf
+    //Main Scene Task stuff
     $('<h1>').addClass('areaHeader').text('Floor 1').appendTo('.mainScene')
     $('<div>').addClass('currentTask').appendTo('.mainScene')
     $('<div>').attr("id","mainBar").appendTo('.mainScene');
     $('<div>').attr("id","progressBarMain").appendTo("#mainBar");
-    $('<div>').addClass('timer').attr("id","timer").appendTo('.mainScene');
+
+    //Boss Scene
+    $('<h1>').addClass('bossHeader').text('Floor 1').appendTo('.bossScene')
+    $('<div>').addClass('currentTask').appendTo('.bossScene')
+    $('<div>').attr("id","bossBar").appendTo('.bossScene');
+    $('<div>').attr("id","bossBarMain").appendTo("#bossBar");
+    $('<div>').addClass('timer').attr("id","timer").appendTo('.bossScene');
 
     //Rest Scene stuff
     $('<h1>').addClass('campTitle').text('Camp').appendTo('.restScene');
@@ -220,7 +228,7 @@ function initPage(){
     Tasks.startNewTask();
     let task = Tasks.taskList[0];
     addButton("btn-boss","Fight Boss",".startScene",function(){
-        switchScene('.mainScene', 'btn-boss',0);
+        switchScene('.bossScene', 'btn-boss',0);
         fightBoss(task);
     });
 }
@@ -378,37 +386,30 @@ function updateKill(task) {
 }
 
 function fightBoss(task) {
-     //need to remove when boss is done?
+    task.isKilling = false;
+    task.isLooting = false;
+    task.isBoss = true;
     clearTimeout(taskTimer);
+
     $('#btn-boss').remove();
     $('.timer').css("display","inline-block")
     $('.currentTask')
         .text("Boss");
 
     if (Player.power <= task.bossPower) {
-        $('#progressBarMain').css("width","100%");
+        $('#bossBarMain').css("width","100%");
+        $('.timer').text("∞ secs");
         sendMessage("You don't feel powerful enough to defeat this boss.");
     } else {
-        //Timer.setTimer(60);
+        Timer.setTimer(600); //XX.X seconds
     }
-    Timer.setTimer(600); //XX.X seconds
-    console.log("Count outer: "+Timer.count);
-    /*
-    move('#progressBarMain')
-        .set('width', '100%')
-        .duration(900)
-        .end(function(){
-            $('#progressBarMain').css("width","0%");
-        });*/
-        //taskTimer = setTimeout(function(){updateKill(task);}, 1000);
 }
 
 function displayCount(count) {
     var res = count / 10;
-    $('.timer').text(res + ' secs')
+    $('.timer').text(res + ' secs to break through your defences.')
     //document.getElementById("timer").innerHTML = res.toPrecision(count.toString().length) + " secs";
 }
-
 
 initPage();
 initSmith();

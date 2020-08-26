@@ -106,7 +106,13 @@
     display: none;
 }
 
+.bossScene {
+    width: 100%;
+    display: none;
+}
+
 /* TASK BAR STYLES */
+
 .currentTask {
     margin: 70px 0 15px 0;
 }
@@ -118,6 +124,18 @@
 }
 
 #progressBarMain {
+    width: 0%;
+    height: 30px;
+    background-color: blue;
+}
+
+#bossBar {
+    margin: 0 auto;
+    width: 95%;
+    background-color: lightgrey;
+}
+
+#bossBarMain {
     width: 0%;
     height: 30px;
     background-color: blue;
