@@ -2,12 +2,13 @@ var Timer = {
     initial: 30000,
     count: 0,
     counter: undefined, //10 will  run it every 100th of a second
-    initialMillis: undefined,
 
-    countdown: function(diff){
-        console.log("diff: "+diff);
+    countdown: function(diff, task){
         if (Timer.count <= 0) {
             clearInterval(Timer.counter);
+            clearTimeout(task.bossTimer);
+            sendMessage("You pass out.");
+            console.log("PLAYER KILL");
             return;
         }
         Timer.count -= 1 * diff;

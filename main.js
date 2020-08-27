@@ -66,7 +66,16 @@ function switchScene(scene, btnId, taskInd) {
         $('#progressBarMain').animate({width: '100%'}, 800, 'linear', function(){
             $('#progressBarMain').css("width", "0%");
         });  //temporary fix, move for some reason breaks at first scene
-        Tasks.initTask(taskInd); 
+
+        Tasks.initTask(taskInd);
+
+        if(Tasks.taskList[taskInd].isBoss == true){
+            $('#btn-boss').remove();
+            addButton("btn-boss","Fight Boss",".mainScene",function(){
+                switchScene('.bossScene',"btn-boss",taskInd);
+                fightBoss(Tasks.taskList[taskInd]);
+            });
+        }
     } else if (scene == ".restScene") {
         mainTimerGoing = false;
         clearTimeout(taskTimer);
@@ -77,7 +86,7 @@ function switchScene(scene, btnId, taskInd) {
         clearTimeout(taskTimer);
     } else if (scene == ".taskScene") {
         clearTimeout(taskTimer);
-    }
+    } 
 
     $('.taskScene').css("display","none");
     $('.smithScene').css("display", "none");
@@ -154,6 +163,7 @@ function initPage(){
     $('<div>').attr("id","bossBar").appendTo('.bossScene');
     $('<div>').attr("id","bossBarMain").appendTo("#bossBar");
     $('<div>').addClass('timer').attr("id","timer").appendTo('.bossScene');
+    
 
     //Rest Scene stuff
     $('<h1>').addClass('campTitle').text('Camp').appendTo('.restScene');
@@ -225,12 +235,14 @@ function initPage(){
     .click(function(){switchScene(".taskScene","#btn-tasks");})
     .prependTo('.menuBar');
 
+    /*
     Tasks.startNewTask();
     let task = Tasks.taskList[0];
     addButton("btn-boss","Fight Boss",".startScene",function(){
         switchScene('.bossScene', 'btn-boss',0);
         fightBoss(task);
     });
+    */
 }
 
 function initLootTables(){
@@ -315,18 +327,19 @@ function updateLoot(task) {
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
         Tasks.doTask(task);
     } else {
         if (task.taskStage < 0){
             task.taskStage += 1;
         } else if (task.taskStage == 0) {
             task.taskStage += 1;
-            task.taskCompleteFlag = true;
+            task.isBoss = true;
             sendMessage("You find a staircase heading upward.");
             addButton("btn-boss","Fight Boss",".mainScene",function(){
+                //$('#bossBarMain').css("width","0%");
+                switchScene('.bossScene',"btn-boss",task.taskId);
                 fightBoss(task);
-            })
+            });
         }
         task.numTasks = 1;
         task.maxTasks = getRandomInt(3,11);
@@ -341,7 +354,6 @@ function updateLoot(task) {
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
         Tasks.doTask(task);
     }
 }
@@ -366,7 +378,6 @@ function updateKill(task) {
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
         Tasks.doTask(task);
     } else {
         task.numTasks = 1;
@@ -380,29 +391,55 @@ function updateKill(task) {
             .end(function(){
                 $('#progressBarMain').css("width","0%");
             });
-        //taskTimer = setTimeout(function(){Tasks.doTask(task);}, 1000);
         Tasks.doTask(task);
     }
 }
 
 function fightBoss(task) {
-    task.isKilling = false;
-    task.isLooting = false;
-    task.isBoss = true;
     clearTimeout(taskTimer);
+    
+    move('#bossBarMain')
+        .set('width', '0%')
+        .end();
 
     $('#btn-boss').remove();
     $('.timer').css("display","inline-block")
     $('.currentTask')
         .text("Boss");
 
-    if (Player.power <= task.bossPower) {
+    if (Player.power < task.bossPower) {
         $('#bossBarMain').css("width","100%");
         $('.timer').text("∞ secs");
         sendMessage("You don't feel powerful enough to defeat this boss.");
     } else {
-        Timer.setTimer(600); //XX.X seconds
+        let bossTime = Math.round((Player.defense / task.bossPower) * 600);
+        let bossKillTime = Math.round((task.bossDef / Player.power) * 60000); //millis for setTimeout?
+
+        move('#bossBarMain')
+            .set('width', '100%')
+            .duration(bossKillTime)
+            .end();
+        
+        task.bossTimer = setTimeout(function(){  //requestAnimationFrame?
+            clearInterval(Timer.counter);
+            task.taskCompleteFlag = true;
+            /* PLAYER REWARDS */
+            console.log("BOSS KILL");
+        }, bossKillTime)
+        Timer.setTimer(bossTime, task); //XX.X seconds
     }
+
+    $('<div>')
+    .addClass('btn')
+    .attr("id","btn-returnFloor")
+    .text("Go Back")
+    .click(function(){
+        switchScene('.mainScene','btn-returnFloor',task.taskId);
+        clearTimeout(task.bossTimer);
+        clearInterval(Timer.counter);
+        $('#btn-returnFloor').remove();
+    })
+    .appendTo('.bossScene');
 }
 
 function displayCount(count) {

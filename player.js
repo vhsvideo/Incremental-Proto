@@ -33,6 +33,10 @@ var Player = {
         wpn2: undefined
     },
 
+    setEnergy: function(){
+
+    },
+
     rest: function(){
         Player.energy = 100;
         $('.energy').text('Energy: ' + Player.energy + '%');
@@ -44,5 +48,11 @@ var Player = {
         } else {
             console.log("No difference.")
         }
-    }
+    },
+
+    getPower: function(){
+        return this.power;
+    },
+
+
 };

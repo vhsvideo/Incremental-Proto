@@ -1,6 +1,7 @@
 var Tasks = {
     taskName: "",
     taskStage: 0,
+    taskId: 0,
     taskCompleteFlag: false,
     maxTasks: 0,
     onTask: false,
@@ -8,6 +9,8 @@ var Tasks = {
     isLooting: false,
     isBoss: false,
     bossPower: 10,
+    bossdef: 10,
+    bossTimer: undefined,
     taskIncr: 1,
     numTasks: 0,
     tasksComplete: 0,
@@ -16,6 +19,7 @@ var Tasks = {
     Task: function(options) {
         this.taskName = options.taskName;
         this.taskStage = options.taskStage;
+        this.taskId = options.taskId;
         this.taskCompleteFlag = options.taskCompleteFlag;
         this.maxTasks = options.maxTasks;
         this.onTask = options.onTask;
@@ -23,14 +27,17 @@ var Tasks = {
         this.isLooting = options.isLooting;
         this.isBoss = options.isBoss;
         this.bossPower = options.bossPower;
+        this.bossDef = options.bossDef;
         this.taskIncr = options.taskIncr;
         this.numTasks = options.numTasks;
+        this.bossTimer = options.bossTimer;
     },
 
-    startNewTask: function() {
+    startNewTask: function(id) {
         let task = new Tasks.Task({
             taskName: ("Floor"+(this.tasksComplete + 1)),
             taskStage: 0,
+            taskId: id,
             taskIncr: 1,
             maxTasks: 0,
             numTasks: 1,
@@ -39,20 +46,22 @@ var Tasks = {
             isKilling: false,
             isLooting: false,
             isBoss: false,
-            bossPower: 10
+            bossPower: 10,
+            bossDef: 10,
+            bossTimer: undefined
         });
         this.taskList.push(task);
     },
 
     initTask: function(id) {
         if (typeof this.taskList[id] == 'undefined') {
-            this.startNewTask();
+            this.startNewTask(id);
         }
         //switchScene('.mainScene');
         
         let task = this.taskList[id];
 
-        if ((task.isLooting == false) && (task.isKilling == false) && (task.isBoss == false)){ //if it's a new task
+        if ((task.isLooting == false) && (task.isKilling == false)){ //if it's a new task
             task.isKilling = true;
             task.maxTasks = getRandomInt(3, 10);
 
