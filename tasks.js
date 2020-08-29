@@ -90,4 +90,15 @@ var Tasks = {
             taskTimer = setTimeout(function(){updateLoot(task);}, 1000);
         }
     },
+
+    completeTask: function(task) {
+        Tasks.tasksComplete += 1;
+        let floorLvl = Tasks.tasksComplete + 1;
+        $('<div>')
+        .addClass('btn')
+        .attr("id",("btn-f"+floorLvl))
+        .text('Floor '+(floorLvl))
+        .click(function(){switchScene('.mainScene', ("btn-f"+floorLvl), Tasks.tasksComplete);})
+        .appendTo('.taskScene');
+    }
 }

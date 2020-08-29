@@ -4,6 +4,8 @@ var lastUpdate = new Date().getTime();
 var newGame = true;
 
 var msgBoxShow = true;
+var msgList = [];
+var msgId = 0;
 var lootList = [];
 var intervalSpeed = 1000;
 var mainTimer = undefined;
@@ -24,7 +26,8 @@ function rollLoot() {
     var i;
     
     for(i = 0; i < (lootList.length); i++) {
-        var roll = (Math.floor(Math.random()*100) / 100);
+        var roll = (Math.round(Math.random()*100) / 100);
+        console.log(roll);
         if (roll <= lootList[i].weight) {
             var item = lootList[i].name;
             item = item.replace(/\s+/g, '');    //remove spaces for class
@@ -46,6 +49,29 @@ function rollLoot() {
 function disableBtn(btn) {
     $(btn).css({"opacity": "50%", "cursor": "context-menu"})
     .unbind('click');
+}
+
+function enableBtn(btn, clickFunc) {
+    $(btn).css({"opacity": "100%", "cursor": "pointer"})
+    .click(clickFunc);
+}
+
+function btnCooldown(btn, cd, clickFunc) {
+    $('<div>').addClass('btn-cooldown').appendTo(btn);
+    disableBtn(btn);
+
+    move('.btn-cooldown') //for some reason if i dont set this, the bottom animation doesn't play
+    .set('width', '100%')
+    .end();
+
+    move('.btn-cooldown')
+        .set('width', '0%')
+        .ease('linear')
+        .duration(cd)
+        .end(function(){
+            enableBtn(btn, clickFunc);
+            $('.btn-cooldown').remove();
+        });
 }
 
 function switchScene(scene, btnId, taskInd) {
@@ -92,10 +118,13 @@ function switchScene(scene, btnId, taskInd) {
     currentScene = scene;
 }
 
-function cookStuff() {
-    if (Player.inventory["raw meat"] > 0) {
-        Player.inventory["raw meat"] -= 1;
-        if(Player.inventory["raw meat"] - 1 == 0){
+function cookStuff(btn) {
+    if (Player.inventory["raw meat"] >= 5 && Player.inventory.hasOwnProperty("raw meat")) {
+        btnCooldown(btn, 10000, 
+            (function(){cookStuff(btn)}));
+        Player.inventory["raw meat"] -= 5;
+        sendMessage("You cook some rations.");
+        if(Player.inventory["raw meat"] == 0){
             $('.rawmeat').remove();
         } else {
             $('.rawmeat').text(Player.inventory["raw meat"]+' raw meat');
@@ -164,7 +193,7 @@ function initPage(){
     .text('Cook')
     .addClass('btn')
     .attr("id","btn-cook")
-    .click(function(){cookStuff();})
+    .click(function(){cookStuff('#btn-cook');})
     .appendTo('.restScene');
 
     //Task/Area scene stuff
@@ -174,7 +203,7 @@ function initPage(){
     .addClass('btn')
     .attr("id","btn-f1")
     .text('Floor 1')
-    .click(function(){switchScene('.mainScene', "btn-f1",0)})
+    .click(function(){switchScene('.mainScene', "btn-f1",0);})
     .appendTo('.taskScene');
 
     //Player Info
@@ -259,8 +288,27 @@ function initLootTables(){
 }
 
 function sendMessage(msg) {
-    $('<div>').addClass('msg').text(msg).prependTo('.messageBox');
-    $('.msg').animate({opacity: '100%'}, 500, 'linear');
+    let _max_msgs = 8
+
+    if (msgId == 0) {
+        $('<div>').addClass('msg').attr("id","msg0").text(msg).prependTo('.messageBox');
+        $('.msg').animate({opacity: '100%'}, 500, 'linear');
+        msgId++;
+    } else if (msgId <= _max_msgs) {
+        for (i = (msgId - 1); i >= 0; i--) {
+            $('#msg'+i).attr("id","msg"+(i+1))
+            console.log("msg "+i);
+        }
+        $('<div>').addClass('msg').attr("id","msg0").text(msg).prependTo('.messageBox');
+        $('.msg').animate({opacity: '100%'}, 500, 'linear');
+        msgId++;
+    }
+
+    if (msgId >= _max_msgs) {
+        msgId = _max_msgs;
+        console.log("max msg "+msgId);
+        $('#msg'+(_max_msgs-1)).remove();
+    }
 }
 
 function startGame() {
@@ -427,7 +475,9 @@ function fightBoss(task) {
         
         task.bossTimer = setTimeout(function(){  //requestAnimationFrame?
             clearInterval(Timer.counter);
+            Tasks.completeTask(task);
             task.taskCompleteFlag = true;
+
             /* PLAYER REWARDS */
 
             /* PLAYER REWARDS */
@@ -460,3 +510,6 @@ initLootTables(); //might need to move this to be area dependent
 if (newGame) {
     startGame();
 }
+
+$('<h1>').text("AAAAAA").attr("id","A1").appendTo('.startScene')
+$('#A1').attr("id","A2")

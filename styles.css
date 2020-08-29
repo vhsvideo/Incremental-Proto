@@ -157,10 +157,24 @@
     line-height: 30px;
     cursor: pointer;
     background: white;
+    position: relative;
 }
 
 .btn:hover {
     text-decoration: underline;
 }
 
+.btn-cooldown {
+    height: 30px;
+    width: 100%;
+    background: lightgray;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 50%;
+}
 
+
+#A2 {
+    font-size: 10px;
+}
