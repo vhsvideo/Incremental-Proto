@@ -9,6 +9,7 @@ var intervalSpeed = 1000;
 var mainTimer = undefined;
 var taskTimer = undefined;
 var mainTimerGoing = false;
+var currentScene;
 
 
 
@@ -18,19 +19,7 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function gainXp(){
-    if (Player.xp + 2 >= Player.xpReq) {
-        Player.level += 1;
-        Player.xp = 0;
-        Player.xpReq *= 2;
-        $('.level').text("Level: " + Player.level);
-    } else {
-        Player.xp += 2;
-    }
-}
-
 //Maybe refactor this into the loot var?
-
 function rollLoot() {
     var i;
     
@@ -61,7 +50,9 @@ function disableBtn(btn) {
 
 function switchScene(scene, btnId, taskInd) {
     //Make this switch/case?
-    if (scene == ".mainScene") {
+    if (scene == currentScene) {
+        console.log("On same page.");
+    } else if (scene == ".mainScene") {
         $('#progressBarMain').css("width", "0%");
         $('#progressBarMain').animate({width: '100%'}, 800, 'linear', function(){
             $('#progressBarMain').css("width", "0%");
@@ -97,6 +88,8 @@ function switchScene(scene, btnId, taskInd) {
     $('.bossScene').css("display","none");
     //disableBtn(btn);
     $(scene).css("display","inline-block");
+
+    currentScene = scene;
 }
 
 function cookStuff() {
@@ -176,6 +169,7 @@ function initPage(){
 
     //Task/Area scene stuff
     //addButton("btn-f1","Floor 1",'.taskScene', function(){Tasks.initTask(0)});
+    $('<h1>').addClass('towerHeader').text('The Tower').appendTo('.taskScene');
     $('<div>')
     .addClass('btn')
     .attr("id","btn-f1")
@@ -186,6 +180,7 @@ function initPage(){
     //Player Info
     $('<div>').addClass('gold').html('Gold: 0').appendTo('.infoPanel');
     $('<div>').addClass('xp').text('Experience: 0').appendTo('.infoPanel');
+    $('<div>').addClass('xpReq').text('Next Lvl: 20').appendTo('.infoPanel')
     $('<div>').addClass('level').text('Level: 1').appendTo('.infoPanel');
     $('<h1>').addClass('attrHeader').text('Attributes').appendTo('.infoPanel');
     $('<div>').addClass('energy').text('Energy: 100%').appendTo('.infoPanel');
@@ -212,7 +207,7 @@ function initPage(){
     .attr("id","btn-kill")
     .text('Kill')
     .click(function(){switchScene(".mainScene", "#btn-kill");})
-    .prependTo('.menuBar');
+    .prependTo('.menuBar'); //makes more sense for this to be a go back type context?
 
     $('<div>')
     .addClass('btn')
@@ -234,6 +229,13 @@ function initPage(){
     .text('Tower')
     .click(function(){switchScene(".taskScene","#btn-tasks");})
     .prependTo('.menuBar');
+
+    $('<div>')
+    .addClass('btn')
+    .attr("id","btn-shop")
+    .text('Scavenger')
+    .click(function(){switchScene(".shopScene",'#btn-shop');})
+    .appendTo('.menuBar');
 
     /*
     Tasks.startNewTask();
@@ -264,9 +266,6 @@ function sendMessage(msg) {
 function startGame() {
     $('.restScene').css("display","none");
     $('.startScene').css("display","inline-block");
-    /*
-    $('.mainScene').css("display","inline-block");
-    Tasks.initTask(0);*/
 
     $('<div>')
         .addClass('btn')
@@ -363,7 +362,7 @@ function updateKill(task) {
 
     /* UPDATE PLAYER STATS*/
     Player.gold += 1;
-    gainXp();
+    Player.gainXp(task.xpMod);
     $('.gold').text("Gold: " + Player.gold);
     $('.xp').text("Experience: " + Player.xp);
     $('.energy').text("Energy: " + Player.energy + "%");
@@ -373,6 +372,7 @@ function updateKill(task) {
         $('.currentTask')
             .text("Killing... ("+task.numTasks+"/"+task.maxTasks+")");
         move('#progressBarMain')
+            .ease('linear') //apparently this sets the style to be linear forever (???)
             .set('width', '100%')
             .duration(900)
             .end(function(){
@@ -397,13 +397,17 @@ function updateKill(task) {
 
 function fightBoss(task) {
     clearTimeout(taskTimer);
+    clearTimeout(Timer.counter);
+    clearTimeout(task.bossTimer);
+
+    $('#btn-returnFloor').remove();
     
     move('#bossBarMain')
         .set('width', '0%')
         .end();
 
     $('#btn-boss').remove();
-    $('.timer').css("display","inline-block")
+    $('.timer').css("display","block")
     $('.currentTask')
         .text("Boss");
 
@@ -416,6 +420,7 @@ function fightBoss(task) {
         let bossKillTime = Math.round((task.bossDef / Player.power) * 60000); //millis for setTimeout?
 
         move('#bossBarMain')
+            .ease('linear')
             .set('width', '100%')
             .duration(bossKillTime)
             .end();
@@ -423,6 +428,8 @@ function fightBoss(task) {
         task.bossTimer = setTimeout(function(){  //requestAnimationFrame?
             clearInterval(Timer.counter);
             task.taskCompleteFlag = true;
+            /* PLAYER REWARDS */
+
             /* PLAYER REWARDS */
             console.log("BOSS KILL");
         }, bossKillTime)
@@ -437,7 +444,6 @@ function fightBoss(task) {
         switchScene('.mainScene','btn-returnFloor',task.taskId);
         clearTimeout(task.bossTimer);
         clearInterval(Timer.counter);
-        $('#btn-returnFloor').remove();
     })
     .appendTo('.bossScene');
 }

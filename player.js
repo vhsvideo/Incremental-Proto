@@ -1,7 +1,7 @@
 var Player = {
     gold: 0,
     xp: 0,
-    xpReq: 5,
+    xpReq: 20,
     level: 1,
     lvlBefore: 1,
     lvlAfter: 1,
@@ -11,8 +11,7 @@ var Player = {
     defense: 10,
     renown: 0,
     
-    inventory: {
-    },
+    inventory: {},
     
     stats: {
         str: 10,
@@ -37,6 +36,10 @@ var Player = {
 
     },
 
+    getPower: function(){
+        return this.power;
+    },
+
     rest: function(){
         Player.energy = 100;
         $('.energy').text('Energy: ' + Player.energy + '%');
@@ -50,9 +53,21 @@ var Player = {
         }
     },
 
-    getPower: function(){
-        return this.power;
+    levelUp: function(){
+        Player.level +=1;
+        Player.xp = 0;
+        Player.xpReq = Math.round(Player.xpReq * 1.1);
+        
+        $('.level').text("Level: " + Player.level);
+        $('.xpReq').text("Next Lvl: " + Player.xpReq);
     },
 
-
+    gainXp: function(_xpmod) {
+        let gainedXp = Math.round(getRandomInt(1,3) * _xpmod);
+        if (Player.xp + gainedXp >= Player.xpReq) {
+            this.levelUp();
+        } else {
+            Player.xp += gainedXp;
+        }
+    }
 };

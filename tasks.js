@@ -13,6 +13,7 @@ var Tasks = {
     bossTimer: undefined,
     taskIncr: 1,
     numTasks: 0,
+    xpMod: 1,
     tasksComplete: 0,
     taskList: [],
 
@@ -31,6 +32,7 @@ var Tasks = {
         this.taskIncr = options.taskIncr;
         this.numTasks = options.numTasks;
         this.bossTimer = options.bossTimer;
+        this.xpMod = options.xpMod;
     },
 
     startNewTask: function(id) {
@@ -48,7 +50,8 @@ var Tasks = {
             isBoss: false,
             bossPower: 10,
             bossDef: 10,
-            bossTimer: undefined
+            bossTimer: undefined,
+            xpMod: Math.round((1+id)*1.1)
         });
         this.taskList.push(task);
     },
@@ -57,7 +60,6 @@ var Tasks = {
         if (typeof this.taskList[id] == 'undefined') {
             this.startNewTask(id);
         }
-        //switchScene('.mainScene');
         
         let task = this.taskList[id];
 
