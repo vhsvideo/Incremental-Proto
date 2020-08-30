@@ -63,6 +63,7 @@
     width: 700px;
     height: 100%;
     border: 1px solid black;
+    overflow: hidden;
 }
 
 .messageBox {
@@ -78,37 +79,42 @@
     opacity: 0%;
 }
 
-/* SCENE STYLES */
+/* SCENE STYLES - make this into a section? */
 
 .startScene {
     width: 100%;
-    display: inline-block;
+    top: 0;
+    position: absolute;
 }
 
 .mainScene {
     width: 100%;
     height: 80%;
-    display: none;
+    top: 1000;
+    position: absolute;
 }
 
 .restScene {
     width: 100%;
-    display: none;
+    position: absolute;
 }
 
 .smithScene {
     width: 100%;
-    display: none;
+    top: 1000;
+    position: absolute;
 }
 
 .taskScene {
     width: 100%;
-    display: none;
+    top: 1000;
+    position: absolute;
 }
 
 .bossScene {
     width: 100%;
-    display: none;
+    top: 1000;
+    position: absolute;
 }
 
 /* TASK BAR STYLES */
@@ -174,7 +180,6 @@
     opacity: 50%;
 }
 
-
-#A2 {
-    font-size: 10px;
+#start-btn {
+    margin: 25% auto;
 }

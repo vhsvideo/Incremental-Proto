@@ -7,11 +7,16 @@ var Player = {
     lvlAfter: 1,
     lvlDiff: 0,
     energy: 100,
+    maxEnergy: 100,
+    energyMod: 1,
     power: 10,
     defense: 10,
     renown: 0,
-    
-    inventory: {},
+    energyFlag: false,
+
+    inventory: {
+        'raw meat': 100
+    },
     
     stats: {
         str: 10,
@@ -32,8 +37,23 @@ var Player = {
         wpn2: undefined
     },
 
-    setEnergy: function(){
+    handleEnergy: function(){
+        let randEnergy = (Math.round(Math.random()*(300 - 50) + 50) / 100) * Player.energyMod;
 
+        if (Player.energy - randEnergy < 0) {
+            if (Player.energyFlag == false) {
+                sendMessage('You feel exhausted.');
+                Player.energyFlag = true;
+            }
+            Player.energy = 0;
+            return Player.energy.toFixed(2);
+        } else {
+            Player.energyFlag = false;
+            Player.energy -= randEnergy;
+            $('.energy').text("Energy: " + Player.energy.toFixed(2) + "%");
+            return Player.energy.toFixed(2);
+        } 
+        
     },
 
     getPower: function(){
@@ -68,6 +88,17 @@ var Player = {
             this.levelUp();
         } else {
             Player.xp += gainedXp;
+            $('.xp').text('Experience: ' + Player.xp);
         }
+    },
+
+    gainGold: function(task) {
+        let gainedGold = Math.round(getRandomInt(1,5) * task.goldMod);
+        Player.gold += gainedGold;
+        $('.gold').text('Gold: ' + Player.gold);
+    },
+
+    eat: function() {
+
     }
 };

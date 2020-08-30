@@ -4,15 +4,12 @@ var lastUpdate = new Date().getTime();
 var newGame = true;
 
 var msgBoxShow = true;
-var msgList = [];
-var msgId = 0;
 var lootList = [];
 var intervalSpeed = 1000;
 var mainTimer = undefined;
 var taskTimer = undefined;
 var mainTimerGoing = false;
 var currentScene;
-
 
 
 function getRandomInt(min, max) {
@@ -60,18 +57,21 @@ function btnCooldown(btn, cd, clickFunc) {
     $('<div>').addClass('btn-cooldown').appendTo(btn);
     disableBtn(btn);
 
-    move('.btn-cooldown') //for some reason if i dont set this, the bottom animation doesn't play
+    move('.btn-cooldown') //for some reason if i dont set this, the following animation doesn't play
     .set('width', '100%')
     .end();
 
+    setTimeout(function(){
+        enableBtn(btn, clickFunc);
+        $('.btn-cooldown').remove();
+    }, cd)
+    
     move('.btn-cooldown')
         .set('width', '0%')
         .ease('linear')
         .duration(cd)
-        .end(function(){
-            enableBtn(btn, clickFunc);
-            $('.btn-cooldown').remove();
-        });
+        .end();
+    //$('.cooldown-'+btn).animate({width: "0%"}, cd, 'linear');
 }
 
 function switchScene(scene, btnId, taskInd) {
@@ -105,15 +105,17 @@ function switchScene(scene, btnId, taskInd) {
         clearTimeout(taskTimer);
     } 
 
-    $('.taskScene').css("display","none");
-    $('.smithScene').css("display", "none");
-    $('.shopScene').css("display", "none");
-    $('.startScene').css("display", "none");
-    $('.restScene').css("display","none");
-    $('.mainScene').css("display","none");
-    $('.bossScene').css("display","none");
+    //moving position while keeping main container overflow: hidden allows animations to keep playing in the bg
+    //maybe a stupid way to do it?
+    $('.taskScene').css("top","1000");
+    $('.smithScene').css("top", "1000");
+    $('.shopScene').css("top", "1000");
+    $('.startScene').css("top", "1000");
+    $('.restScene').css("top","1000");
+    $('.mainScene').css("top","1000");
+    $('.bossScene').css("top","1000");
     //disableBtn(btn);
-    $(scene).css("display","inline-block");
+    $(scene).css("top","0");
 
     currentScene = scene;
 }
@@ -124,7 +126,7 @@ function cookStuff(btn) {
             (function(){cookStuff(btn)}));
         Player.inventory["raw meat"] -= 5;
         sendMessage("You cook some rations.");
-        if(Player.inventory["raw meat"] == 0){
+        if(Player.inventory["raw meat"] <= 0){
             $('.rawmeat').remove();
         } else {
             $('.rawmeat').text(Player.inventory["raw meat"]+' raw meat');
@@ -193,8 +195,14 @@ function initPage(){
     .text('Cook')
     .addClass('btn')
     .attr("id","btn-cook")
-    .click(function(){cookStuff('#btn-cook');})
+    .click(function(){cookStuff('btn-cook');})
     .appendTo('.restScene');
+    $('<div>')
+    .text('Eat')
+    .addClass('btn')
+    .attr("id","btn-eat")
+    .click(function(){Player.eat()})
+    .appendTo('.restScene')
 
     //Task/Area scene stuff
     //addButton("btn-f1","Floor 1",'.taskScene', function(){Tasks.initTask(0)});
@@ -287,6 +295,8 @@ function initLootTables(){
     };
 }
 
+var msgId = 0;
+
 function sendMessage(msg) {
     let _max_msgs = 8
 
@@ -294,26 +304,24 @@ function sendMessage(msg) {
         $('<div>').addClass('msg').attr("id","msg0").text(msg).prependTo('.messageBox');
         $('.msg').animate({opacity: '100%'}, 500, 'linear');
         msgId++;
-    } else if (msgId <= _max_msgs) {
+    } else if (msgId <= _max_msgs) { //Push new msgs till max msgs
         for (i = (msgId - 1); i >= 0; i--) {
-            $('#msg'+i).attr("id","msg"+(i+1))
-            console.log("msg "+i);
+            $('#msg'+i).attr("id","msg"+(i+1));
         }
         $('<div>').addClass('msg').attr("id","msg0").text(msg).prependTo('.messageBox');
         $('.msg').animate({opacity: '100%'}, 500, 'linear');
         msgId++;
     }
 
-    if (msgId >= _max_msgs) {
+    if (msgId >= _max_msgs) {  //pop em
         msgId = _max_msgs;
-        console.log("max msg "+msgId);
         $('#msg'+(_max_msgs-1)).remove();
     }
 }
 
 function startGame() {
-    $('.restScene').css("display","none");
-    $('.startScene').css("display","inline-block");
+    $('.restScene').css("top","1000");
+    $('.startScene').css("visibility","visible");
 
     $('<div>')
         .addClass('btn')
@@ -362,6 +370,7 @@ function initSmith() {
 
 function updateLoot(task) {
     task.numTasks += 1;
+    Player.gainGold(task);
     rollLoot(); //might need to update for task-dependent loot tables
 
     if(task.numTasks <= task.maxTasks) {
@@ -409,11 +418,8 @@ function updateKill(task) {
     task.numTasks += 1;
 
     /* UPDATE PLAYER STATS*/
-    Player.gold += 1;
     Player.gainXp(task.xpMod);
-    $('.gold').text("Gold: " + Player.gold);
-    $('.xp').text("Experience: " + Player.xp);
-    $('.energy').text("Energy: " + Player.energy + "%");
+    var nrgMod = Player.handleEnergy();
     /* UPDATE PLAYER STATS*/
 
     if(task.numTasks <= task.maxTasks) {
@@ -511,5 +517,4 @@ if (newGame) {
     startGame();
 }
 
-$('<h1>').text("AAAAAA").attr("id","A1").appendTo('.startScene')
-$('#A1').attr("id","A2")
+console.log()

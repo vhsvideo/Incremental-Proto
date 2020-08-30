@@ -14,6 +14,7 @@ var Tasks = {
     taskIncr: 1,
     numTasks: 0,
     xpMod: 1,
+    goldMod: 1,
     tasksComplete: 0,
     taskList: [],
 
@@ -33,6 +34,7 @@ var Tasks = {
         this.numTasks = options.numTasks;
         this.bossTimer = options.bossTimer;
         this.xpMod = options.xpMod;
+        this.goldMod = options.goldMod;
     },
 
     startNewTask: function(id) {
@@ -51,7 +53,8 @@ var Tasks = {
             bossPower: 10,
             bossDef: 10,
             bossTimer: undefined,
-            xpMod: Math.round((1+id)*1.1)
+            xpMod: Math.round((1+id)*1.1),
+            goldMod: Math.round((1+id)*1.1)
         });
         this.taskList.push(task);
     },
