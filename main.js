@@ -44,34 +44,38 @@ function rollLoot() {
 }
 
 function disableBtn(btn) {
-    $(btn).css({"opacity": "50%", "cursor": "context-menu"})
+    $('#'+btn).css({"opacity": "50%", "cursor": "context-menu"})
     .unbind('click');
 }
 
 function enableBtn(btn, clickFunc) {
-    $(btn).css({"opacity": "100%", "cursor": "pointer"})
+    $('#'+btn).css({"opacity": "100%", "cursor": "pointer"})
     .click(clickFunc);
 }
 
 function btnCooldown(btn, cd, clickFunc) {
-    $('<div>').addClass('btn-cooldown').appendTo(btn);
-    disableBtn(btn);
+    let btnSelector = 'cooldown-'+btn;
 
-    move('.btn-cooldown') //for some reason if i dont set this, the following animation doesn't play
+    $("<style type='text/css'> ."+btnSelector+"{ height: 30px; width: 100%; background: lightgray;position: absolute;top: 0;left: 0;opacity: 50%;} </style>")
+    .appendTo('#wrapper');
+    $('<div>').addClass(btnSelector).appendTo('#'+btn);
+
+    disableBtn(btn);
+    
+    move('.'+btnSelector) //for some reason if i dont set this, the following animation doesn't play
     .set('width', '100%')
     .end();
 
     setTimeout(function(){
         enableBtn(btn, clickFunc);
-        $('.btn-cooldown').remove();
+        $('.'+btnSelector).remove();
     }, cd)
     
-    move('.btn-cooldown')
+    move('.'+btnSelector)
         .set('width', '0%')
         .ease('linear')
         .duration(cd)
         .end();
-    //$('.cooldown-'+btn).animate({width: "0%"}, cd, 'linear');
 }
 
 function switchScene(scene, btnId, taskInd) {

@@ -169,7 +169,7 @@
 .btn:hover {
     text-decoration: underline;
 }
-
+/*
 .btn-cooldown {
     height: 30px;
     width: 100%;
@@ -179,6 +179,7 @@
     left: 0;
     opacity: 50%;
 }
+*/
 
 #start-btn {
     margin: 25% auto;
